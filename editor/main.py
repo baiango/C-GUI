@@ -1,26 +1,26 @@
 import numpy as np
 import pygame
 from pygame.locals import *
+import pygame.freetype
 
-a = np.arange(15).reshape(3, 5)
-print(a)
-print(a.shape)
-pygame.init()
-vec = pygame.math.Vector2  # 2 for two dimensional
 
-HEIGHT = 512
-WIDTH = 512
-ACC = 0.5
-FRIC = -0.12
-FPS = 60
+def main():
+	pygame.init()
 
-FramePerSec = pygame.time.Clock()
+	screen = pygame.display.set_mode((800, 600))
+	pygame.display.set_caption("Bevy py GUI")
 
-displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game")
+	# my_font = pygame.freetype.Font('pixel-clear-condensed.ttf', 30)       x
 
-while True:
-	for event in pygame.event.get():
-		if event.type == QUIT:
-			pygame.quit()
-			exit()
+	looping = True
+	while looping:
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				looping = not looping
+
+		screen.fill((32, 32, 32))
+
+
+		pygame.display.update()
+
+main()
