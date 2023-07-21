@@ -1,4 +1,6 @@
-python*/
-python*.7z
-.idea/*
-ref/*
+x64
+.vs
+r*mi*
+*.dflginspxe
+*.infoinspxe
+*.inspxeproj
