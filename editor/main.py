@@ -1,26 +1,17 @@
-import numpy as np
-import pygame
-from pygame.locals import *
-import pygame.freetype
+import customtkinter as ctk
 
+ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-def main():
-	pygame.init()
+app = ctk.CTk()  # create CTk window like you do with the Tk window
+app.title("Bevy py GUI")
+app.geometry("400x240")
 
-	screen = pygame.display.set_mode((800, 600))
-	pygame.display.set_caption("Bevy py GUI")
+def button_function():
+    print("button pressed")
 
-	# my_font = pygame.freetype.Font('pixel-clear-condensed.ttf', 30)       x
+# Use CTkButton instead of tkinter Button
+button = ctk.CTkButton(master=app, text="CTkButton", command=button_function)
+button.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
 
-	looping = True
-	while looping:
-		for event in pygame.event.get():
-			if event.type == QUIT:
-				looping = not looping
-
-		screen.fill((32, 32, 32))
-
-
-		pygame.display.update()
-
-main()
+app.mainloop()
