@@ -32,7 +32,7 @@ int main() {
 //;	printf("%i\n", GUI_Geti32t(b[0]) + GUI_Geti32t(b[1])) // Panic!
 ;}
 
-;	SDL_Event event
+	SDL_Event event
 ;	while (1) {
 		// Poll
 		SDL_PollEvent(&event)
