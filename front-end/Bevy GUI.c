@@ -6,28 +6,38 @@
 #include "types.h"
 
 
-int main()
-{	printf("Hi!\n")
+int main() {
+	printf("Hi!\n")
 ;	TTF_Init()
 ;	SDL_Window *window
 ;	SDL_Renderer *renderer
-;{	Vec2i window_size = { 800, 600 }
+;{Vec2i window_size = { 800, 600 }
 ;	// Memory leak. Don't call SDL_CreateWindowAndRenderer() more than 1 time.
-	SDL_CreateWindowAndRenderer(window_size.x, window_size.y, SDL_WINDOW_OPENGL, &window, &renderer)
+	SDL_CreateWindowAndRenderer(window_size.x, window_size.y,
+			SDL_WINDOW_OPENGL, &window, &renderer)
 ;}
 
-
-	TxtTexture text
-;{	SDL_Color col = { 0xff, 0xff, 0xff }
-;	text = str_to_texture(renderer, "WWW! my grass!", 24, col, NO_PATH)
+	GUI_TxtTexture text
+;{SDL_Color col = { 0xff, 0xff, 0xff }
+;	text = GUI_StrToTexture(renderer, "WWW! my grass!", 24, col, (char *)NO_PATH)
 ;}
 
-	SDL_Event event
-;	while (1)
-	{	// Poll
+{	i32 a = 10
+	#pragma warning(push)
+	#pragma warning(disable: 4047)
+;	GUI_Var b[2] = {{&a, i32_ptr }, {1, i32_type}}
+	#pragma warning(pop)
+;	a = 20
+;	printf("%i\n", *GUI_Geti32p(b[0]) + GUI_Geti32t(b[1])) // 21
+//;	printf("%i\n", GUI_Geti32t(b[0]) + GUI_Geti32t(b[1])) // Panic!
+;}
+
+;	SDL_Event event
+;	while (1) {
+		// Poll
 		SDL_PollEvent(&event)
-	;	switch (event.type)
-		{case SDL_QUIT: goto quit
+	;	switch (event.type) {
+		case SDL_QUIT: goto quit
 		;}
 		// Render: Clear
 		SDL_SetRenderDrawColor(renderer, 0x20, 0x20, 0x20, 0xff)
