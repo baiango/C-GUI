@@ -1,6 +1,7 @@
-x64
-.vs
-r*mi*
-*.dflginspxe
-*.infoinspxe
-*.inspxeproj
+front-end/x64
+front-end/.vs
+front-end/r*mi*
+front-end/*.dflginspxe
+front-end/*.infoinspxe
+front-end/*.inspxeproj
+back-end/target
