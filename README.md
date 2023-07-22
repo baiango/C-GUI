@@ -5,5 +5,6 @@ Because Godot codebase are like... There's a lot of inlines, pointers, generic, 
 [Compared to this!!!(Bevy)](https://github.com/bevyengine/bevy/blob/eb485b1acc619baaae88d5daca0a311b95886281/crates/bevy_render/src/texture/image.rs#L266C1-L271C6)
 
 # Editor architecture
+[You can use this first. (bevy_editor_pls)](https://github.com/jakobhellermann/bevy_editor_pls)  
 I use C because of the simplicity, which is critical for GUI program. And Rust/C++ is too verbose for the job because of the namespaces.  
 So Rust is only used for long computation time things/algorithms.
