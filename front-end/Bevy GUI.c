@@ -1,4 +1,3 @@
-#include <stdio.h>
 #define SDL_MAIN_HANDLED
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_image.h>
@@ -11,15 +10,15 @@ int main() {
 ;	TTF_Init()
 ;	SDL_Window *window
 ;	SDL_Renderer *renderer
-;{Vec2i window_size = { 800, 600 }
-;	// Memory leak. Don't call SDL_CreateWindowAndRenderer() more than 1 time.
-	SDL_CreateWindowAndRenderer(window_size.x, window_size.y,
+;	Vec2i window_size = { 800, 600 }
+;	SDL_CreateWindowAndRenderer(window_size.x, window_size.y,
 			SDL_WINDOW_OPENGL, &window, &renderer)
-;}
+;
 
 	GUI_TxtTexture text
-;{SDL_Color col = { 0xff, 0xff, 0xff }
-;	text = GUI_StrToTexture(renderer, "WWW! my grass!", 24, col, (char *)NO_PATH)
+;{	SDL_Color col = { 0xff, 0xff, 0xff }
+;	Vec2i ofst = { 10, 10 }
+;	text = GUI_StrToTexture(renderer, "WWW! my grass!", ofst, 24, col, NO_PATH)
 ;}
 
 {	i32 a = 10
@@ -32,20 +31,37 @@ int main() {
 //;	printf("%i\n", GUI_Geti32t(b[0]) + GUI_Geti32t(b[1])) // Panic!
 ;}
 
-	SDL_Event event
+;	SDL_Event event
 ;	while (1) {
-		// Poll
+		SDL_Delay(15)
+	;	// Poll
 		SDL_PollEvent(&event)
 	;	switch (event.type) {
 		case SDL_QUIT: goto quit
 		;}
-		// Render: Clear
+		// Process
+		GUI_TxtTexture clock
+	;{	SDL_Color col = { 255 - (u8)(SDL_GetTicks() * 0.1), (u8)(SDL_GetTicks() / 3.0), 255 }
+	;	i32 size = 96
+	;	Vec2i ofst = { window_size.x / 2 - size / 2, window_size.y / 2 - size  / 2}
+	;	Vec3i time = GUI_Expand1DTo3D(SDL_GetTicks(), 1000, 60)
+
+	;	char *time_ms = GUI_u64ToStr(time.z), *time_s = GUI_u64ToStr(time.y), *time_m = GUI_u64ToStr(time.x)
+	;	char *txt = GUI_Join(":", 3, time_ms, time_s, time_m)
+	;	free(time_ms); free(time_s); free(time_m)
+
+	;	clock = GUI_StrToTexture(renderer, txt, ofst, size, col, NO_PATH)
+	;	free(txt)
+	;}// Render: Texture
+		SDL_RenderCopy(renderer, text.text_texture, NULL, &text.text_stretch)
+	;	SDL_RenderCopy(renderer, clock.text_texture, NULL, &clock.text_stretch)
+	;	SDL_RenderPresent(renderer)
+	;	// Render: Clear
 		SDL_SetRenderDrawColor(renderer, 0x20, 0x20, 0x20, 0xff)
 	;	SDL_RenderClear(renderer)
-	;	// Render
-		SDL_RenderCopy(renderer, text.text_texture, NULL, &text.text_stretch)
-	;	SDL_RenderPresent(renderer)
+	;	SDL_DestroyTexture(clock.text_texture)
 	;}
+
 
 quit:
 	// Free

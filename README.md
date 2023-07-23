@@ -8,3 +8,7 @@ Because Godot codebase are like... There's a lot of inlines, pointers, generic, 
 [You can use this first. (bevy_editor_pls)](https://github.com/jakobhellermann/bevy_editor_pls)  
 I use C because of the simplicity, which is critical for GUI program. And Rust/C++ is too verbose for the job because of the namespaces.  
 So Rust is only used for long computation time things/algorithms.
+
+# Coding style
+Tabs are 2 characters, but up to 8 indentations are supported. The semicolons will help you read the indentations. The reason to make indentation 2 is GUI tends to nested deeply.  
+Lines should be below 75 characters for reading in split screen. The exception is if the information is repeating or verbose.  

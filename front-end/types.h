@@ -1,5 +1,4 @@
 #pragma once
-#include <stdlib.h>
 
 
 typedef unsigned char u8; typedef unsigned short u16; typedef unsigned u32; typedef unsigned long long u64;
@@ -9,6 +8,18 @@ typedef float f32; typedef double f64; typedef long double f80;
 
 typedef struct { f32 x, y; } Vec2f;
 typedef struct { i32 x, y; } Vec2i;
+typedef struct { f32 x, y, z; } Vec3f;
+typedef struct { i32 x, y, z; } Vec3i;
+/// (Vec2i){ i % row, i / row }
+Vec2i GUI_Expand1DTo2D(i32 i, i32 row) { return (Vec2i){ i % row, i / row }; }
+/// (Vec3i){ i % row, i / row % col, i / row / col }
+Vec3i GUI_Expand1DTo3D(i32 i, i32 row, i32 col) { return (Vec3i){ i % row, i / row % col, i / row / col }; }
+/// x + (y * row)
+i32 GUI_Flat2DTo1D(Vec2i vec, i32 row) { return vec.x + (vec.y * row); }
+/// x + (y * row) + (z * row * col)
+i32 GUI_Flat3DTo1D(Vec3i vec, i32 row, i32 col) { return vec.x + (vec.y * row) + (vec.z * row * col); }
+
+
 typedef struct {
 	SDL_Color text_color
 ;	SDL_Texture *text_texture
@@ -16,18 +27,19 @@ typedef struct {
 ; } GUI_TxtTexture;
 
 
+/// return NULL;
 void *NO_PATH = NULL;
 /*Example:
-{	GUI_TxtTexture text = GUI_StrToTexture(renderer, "WWW! my grass!", 24, (SDL_Color){ 0xff, 0xff, 0xff }, NO_PATH)
-;	SDL_DestroyTexture(text.text_texture)
-;}
+	{	GUI_TxtTexture text = GUI_StrToTexture(renderer, "WWW! my grass!", 24, (SDL_Color){ 0xff, 0xff, 0xff }, NO_PATH)
+	;	SDL_DestroyTexture(text.text_texture)
+	;}
 	It will cause memory leak if you don't destroy the texture. */
 GUI_TxtTexture GUI_StrToTexture(
-		SDL_Renderer *renderer, char str[], int font_size,
+		SDL_Renderer *renderer, char str[], Vec2i offset, int font_size,
 		SDL_Color text_color, char font_path[]
 )	{
 	GUI_TxtTexture ret
-;{TTF_Font *font
+;{	TTF_Font *font
 ;	if (NULL == font_path) {
 		font = TTF_OpenFont("pixel-clear-condensed.ttf", font_size)
 	;	if (NULL == font) { printf("Font not found! Panic!\n"); exit(-1)
@@ -42,10 +54,9 @@ GUI_TxtTexture GUI_StrToTexture(
 ;	ret.text_texture = SDL_CreateTextureFromSurface(renderer, text_surface)
 ;	SDL_FreeSurface(text_surface)
 ;
-	Vec2i txtofst = { 10, 10 }
 ;	i32 txtw, txth
 ;	SDL_QueryTexture(ret.text_texture, NULL, NULL, &txtw, &txth)
-;	ret.text_stretch = (SDL_Rect){ txtofst.x, txtofst.y, txtw, txth }
+;	ret.text_stretch = (SDL_Rect){ offset.x, offset.y, txtw, txth }
 ;}
 	return ret
 ; }
@@ -58,7 +69,7 @@ enum Type {
 ,	u8_type, u16_type, u32_type, u64_type
 ,	i8_type, i16_type, i32_type, i64_type
 ,	f32_type, f64_type
-, };
+,	};
 /*For Reactive Programming:
 {	i32 a = 10
 	#pragma warning(push)
@@ -69,6 +80,7 @@ enum Type {
 ;	printf("%i\n", *GUI_Geti32p(b[0]) + GUI_Geti32t(b[1])) // 21
 //;	printf("%i\n", GUI_Geti32t(b[0]) + GUI_Geti32t(b[1])) // Panic!
 ;}
+	It's almost the same as std::variant.
 */
 typedef struct {
 	union ptr
@@ -81,7 +93,8 @@ typedef struct {
 	;	f32 f32t; f64 f64t
 	;}
 	;	u8 type
-;	} GUI_Var;
+; } GUI_Var;
+
 
 u8 *GUI_Getu8p(GUI_Var var) { if (u8_ptr != var.type) { printf("Not u8_ptr! Panic!\n"); exit(-1); } return var.u8p; }
 u16 *GUI_Getu16p(GUI_Var var) { if (u16_ptr != var.type) { printf("Not u16_ptr! Panic!\n"); exit(-1); } return var.u16p; }
@@ -103,3 +116,44 @@ i32 GUI_Geti32t(GUI_Var var) { if (i32_type != var.type) { printf("Not i32_type!
 i64 GUI_Geti64t(GUI_Var var) { if (i64_type != var.type) { printf("Not i64_type! Panic!\n"); exit(-1); } return var.i64t; }
 f32 GUI_Getf32t(GUI_Var var) { if (f32_type != var.type) { printf("Not f32_type! Panic!\n"); exit(-1); } return var.f32t; }
 f64 GUI_Getf64t(GUI_Var var) { if (f64_type != var.type) { printf("Not f64_type! Panic!\n"); exit(-1); } return var.f64t; }
+
+/*Example:
+	char *num = GUI_u64ToStr(100)
+;	printf("%s\n", num) // 100
+;	free(num)
+;
+*/
+char *GUI_u64ToStr(u64 num) {
+	char buf[20]; // 18446744073709551615
+;	if (NULL == buf) { printf("GUI_u64ToStr: Out of memory! Returning ""."); return ""; }
+;	sprintf_s(buf, sizeof buf, "%llu", num)
+;
+	char *ret = malloc(strlen(buf) + 1)
+;	if (NULL == ret) { return ""; }
+;	strcpy_s(ret, strlen(buf) + 1, buf)
+;	return ret;
+; }
+
+/*Example:
+	char *str = GUI_Join(", ", 3, "a1", "bb2", "ccc3")
+;	printf("%s\n", str) // a1, bb2, ccc3
+;	free(str)
+;
+*/
+char *GUI_Join(char *separator, i32 len, ...) {
+	char buf[1024] = ""
+;{	va_list list
+;	va_start(list, len)
+;	for (; len > 1; len--) {
+		char *str = va_arg(list, char*)
+	;	strcat_s(buf, 1024, str)
+	;	strcat_s(buf, 1024, separator)
+	;}
+	strcat_s(buf, 1024, va_arg(list, char*))
+;	va_end(list)
+;}
+	char *ret = malloc(strlen(buf) + 1)
+;	if (NULL == ret) { return ""; }
+;	strcpy_s(ret, strlen(buf) + 1, buf)
+;	return ret
+; }
