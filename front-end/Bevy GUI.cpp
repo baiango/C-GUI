@@ -2,7 +2,9 @@
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_image.h>
 #include <sdl2/SDL_ttf.h>
-#include "types.h"
+#include "types.hpp"
+#include <iostream>
+using std::cout;
 
 
 int main() {
@@ -22,13 +24,10 @@ int main() {
 ;}
 
 {	i32 a = 10
-	#pragma warning(push)
-	#pragma warning(disable: 4047)
-;	GUI_Var b[2] = {{&a, i32_ptr }, {1, i32_type}}
-	#pragma warning(pop)
+;	array<GUI_Var, 2> b = {&a, 1}
 ;	a = 20
-;	printf("%i\n", *GUI_Geti32p(b[0]) + GUI_Geti32t(b[1])) // 21
-//;	printf("%i\n", GUI_Geti32t(b[0]) + GUI_Geti32t(b[1])) // Panic!
+;	cout << *get<i32*>(b[0]) + get<i32>(b[1]) << "\n" // 21
+//;	cout << get<i32>(b[0]) + get<i32>(b[1]) // Panic!
 ;}
 
 ;	SDL_Event event
@@ -41,18 +40,16 @@ int main() {
 		;}
 		// Process
 		GUI_TxtTexture clock
-	;{	SDL_Color col = { 255 - (u8)(SDL_GetTicks() * 0.1), (u8)(SDL_GetTicks() / 3.0), 255 }
+	;{	SDL_Color col = { (u8)(255 - SDL_GetTicks() * 0.1), (u8)(SDL_GetTicks() / 3.0), 255 }
 	;	i32 size = 96
 	;	Vec2i ofst = { window_size.x / 2 - size / 2, window_size.y / 2 - size  / 2}
 	;	Vec3i time = GUI_Expand1DTo3D(SDL_GetTicks(), 1000, 60)
 
-	;	char *time_ms = GUI_u64ToStr(time.z), *time_s = GUI_u64ToStr(time.y), *time_m = GUI_u64ToStr(time.x)
-	;	char *txt = GUI_Join(":", 3, time_ms, time_s, time_m)
-	;	free(time_ms); free(time_s); free(time_m)
-
-	;	clock = GUI_StrToTexture(renderer, txt, ofst, size, col, NO_PATH)
-	;	free(txt)
-	;}// Render: Texture
+	;	string time_ms = to_string(time.z), time_s = to_string(time.y), time_m = to_string(time.x)
+	;	string txt = GUI_Join(":", { time_ms, time_s, time_m })
+	;
+		clock = GUI_StrToTexture(renderer, txt, ofst, size, col, NO_PATH)
+	;}	// Render: Texture
 		SDL_RenderCopy(renderer, text.text_texture, NULL, &text.text_stretch)
 	;	SDL_RenderCopy(renderer, clock.text_texture, NULL, &clock.text_stretch)
 	;	SDL_RenderPresent(renderer)
