@@ -1,7 +1,5 @@
 front-end/x64
 front-end/.vs
-front-end/r*mi*
-front-end/*.dflginspxe
-front-end/*.infoinspxe
-front-end/*.inspxeproj
+front-end/inspector
 back-end/target
+back-end/inspector

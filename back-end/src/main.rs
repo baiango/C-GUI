@@ -1,30 +1,63 @@
-use std::time::Duration;
-use sdl2::{event::Event, pixels::Color, keyboard::Keycode};
+use string_join::Join;
+use sdl2::{pixels::Color, event::Event, ttf, rect::Rect, render::TextureQuery};
 
+mod sdl2_types;
+use sdl2_types::*;
+mod types;
+use types::*;
 
 fn main()
 {	println!("Hi!\n")
-;	let sdl_context = sdl2::init().unwrap()
-;	let video_subsystem = sdl_context.video().unwrap()
-;
-	let window = video_subsystem.window("rust-sdl2 demo", 800, 600)
-		.build()
-		.unwrap()
-;
-	let mut canvas = window.into_canvas().build().unwrap()
-;
-	let mut event_pump = sdl_context.event_pump().unwrap()
-;	let mut i = 0
-;	'running: loop
-	{	i = (i + 1) % 255
-	;	canvas.set_draw_color(Color::RGB(i, 64, 255 - i))
-	;	canvas.clear()
-	;	for event in event_pump.poll_iter()
-		{	match event
-			{Event::Quit {..} |
-			Event::KeyDown { keycode: Some(Keycode::Escape), .. } => { break 'running },
-			_ => {}}}
+;	let sdl = sdl2::init().unwrap()
 
-		canvas.present()
-;		std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60))
-; }}
+	// Window
+;	let video = sdl.video().unwrap()
+;	let window = video.window("rust-sdl2 demo", 800, 600).position_centered().build().unwrap();
+	let mut canvas = window.into_canvas().build().unwrap()
+; let mktex = canvas.texture_creator()
+;
+	// Time
+	let time = sdl.timer().unwrap()
+;
+	// Ttf
+	let ttf = ttf::init().unwrap()
+;
+		let mut event = sdl.event_pump().unwrap()
+; 'quit: loop {
+		if let Some(e) = event.poll_event() {
+			match e {
+			Event::Quit {..} => { break 'quit },
+			_ => {}
+			}}
+	{	let px_font = ttf.load_font("pixel-clear-condensed.ttf", 100).unwrap()
+	;	let px_surface = px_font.render("WWW! my grass!").blended(Color::WHITE).unwrap()
+	;	let px_texture = mktex.create_texture_from_surface(&px_surface).unwrap()
+	; let TextureQuery { width: w, height: h, .. } = px_texture.query()
+	;	let px_stretch = Rect::new(10, 10, w, h)
+	;	let _ = canvas.copy(&px_texture, WHOLE, px_stretch)
+	;}
+
+	{	let (width, height) = canvas.output_size().unwrap()
+	;	let sz = 96
+	;	let ofst = Vec2u { x: width / 2 - sz / 2, y: height / 2 - sz / 2 }
+	;	let col = Color::RGB(32, 32, 255)
+
+	; let clock = Vec3u::expand_1d_to_3d(time.ticks(), 1000, 60)
+	; let txt = ":".join([clock.z.to_string(), clock.y.to_string(), clock.x.to_string()])
+
+	; let TxtTex { tex, strh} = TxtTex::new(txt.as_str(), sz as u16, ofst, col, NO_PATH, &ttf, &mktex)
+	;	let _ = canvas.copy(&tex, WHOLE, strh)
+	;}
+
+	{	let TxtTex { tex: grass, strh } = TxtTex::new(
+			"00:00:00", 24,
+			Vec2u {x: 100,y: 10}, Color::GREEN,
+			NO_PATH, &ttf, &mktex
+		)
+	;	let _ = canvas.copy(&grass, WHOLE, strh)
+	;}
+	;	canvas.present()
+	;	canvas.set_draw_color(Color::RGB(0x20, 0x20, 0x20))
+	;	canvas.clear()
+	;}
+}
