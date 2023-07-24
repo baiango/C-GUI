@@ -8,7 +8,7 @@
 ;	let _ = canvas.copy(&grass, WHOLE, strh)
 ;}
 ```
-### Place the semicolons at the scope to give a hint about the indentions.  
+### Place the semicolons at the scope to give a hint about the current indentions.  
 ### If the line statement is important, limit the line length below 75 characters.
 ### Recommend to read it with 2 indentations. But up to 8 are supported.
 ```
