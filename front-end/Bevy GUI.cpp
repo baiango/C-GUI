@@ -18,7 +18,8 @@ int main() {
 ;
 
 	GUI_TxtTexture text
-;{	SDL_Color col = { 0xff, 0xff, 0xff }
+;
+{	SDL_Color col = { 0xff, 0xff, 0xff }
 ;	Vec2i ofst = { 10, 10 }
 ;	text = GUI_StrToTexture(renderer, "WWW! my grass!", ofst, 24, col, NO_PATH)
 ;}
@@ -29,8 +30,8 @@ int main() {
 ;	cout << *get<i32*>(b[0]) + get<i32>(b[1]) << "\n" // 21
 //;	cout << get<i32>(b[0]) + get<i32>(b[1]) // Panic!
 ;}
-
-;	SDL_Event event
+;
+	SDL_Event event
 ;	while (1) {
 		SDL_Delay(15)
 	;	// Poll
@@ -49,7 +50,8 @@ int main() {
 	;	string txt = GUI_Join(":", { time_ms, time_s, time_m })
 	;
 		clock = GUI_StrToTexture(renderer, txt, ofst, size, col, NO_PATH)
-	;}	// Render: Texture
+	;}
+		// Render: Texture
 		SDL_RenderCopy(renderer, text.text_texture, NULL, &text.text_stretch)
 	;	SDL_RenderCopy(renderer, clock.text_texture, NULL, &clock.text_stretch)
 	;	SDL_RenderPresent(renderer)

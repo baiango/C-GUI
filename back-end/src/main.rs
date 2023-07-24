@@ -1,20 +1,27 @@
 use string_join::Join;
 use sdl2::{pixels::Color, event::Event, ttf, rect::Rect, render::TextureQuery};
 
-mod sdl2_types;
-use sdl2_types::*;
-mod types;
-use types::*;
+
+mod ui {
+	pub mod sdl2_types;
+}
+use crate::ui::sdl2_types::*;
+
+mod engine {
+	pub mod types;
+}
+use crate::engine::types::*;
+
 
 fn main()
 {	println!("Hi!\n")
 ;	let sdl = sdl2::init().unwrap()
-
+;
 	// Window
-;	let video = sdl.video().unwrap()
-;	let window = video.window("rust-sdl2 demo", 800, 600).position_centered().build().unwrap();
-	let mut canvas = window.into_canvas().build().unwrap()
-; let mktex = canvas.texture_creator()
+	let video = sdl.video().unwrap()
+;	let window = video.window("rust-sdl2 demo", 800, 600).position_centered().build().unwrap()
+;	let mut canvas = window.into_canvas().build().unwrap()
+;	let mktex = canvas.texture_creator()
 ;
 	// Time
 	let time = sdl.timer().unwrap()
@@ -29,6 +36,10 @@ fn main()
 			Event::Quit {..} => { break 'quit },
 			_ => {}
 			}}
+		// Visual Debug
+	// {	show_debug_overlay("some.png")
+	// ;}
+		// Render
 	{	let px_font = ttf.load_font("pixel-clear-condensed.ttf", 100).unwrap()
 	;	let px_surface = px_font.render("WWW! my grass!").blended(Color::WHITE).unwrap()
 	;	let px_texture = mktex.create_texture_from_surface(&px_surface).unwrap()
@@ -39,20 +50,20 @@ fn main()
 
 	{	let (width, height) = canvas.output_size().unwrap()
 	;	let sz = 96
-	;	let ofst = Vec2u { x: width / 2 - sz / 2, y: height / 2 - sz / 2 }
+	;	let ofst = Vec2u { x: width / 2, y: height / 2 }
 	;	let col = Color::RGB(32, 32, 255)
 
 	; let clock = Vec3u::expand_1d_to_3d(time.ticks(), 1000, 60)
 	; let txt = ":".join([clock.z.to_string(), clock.y.to_string(), clock.x.to_string()])
 
-	; let TxtTex { tex, strh} = TxtTex::new(txt.as_str(), sz as u16, ofst, col, NO_PATH, &ttf, &mktex)
-	;	let _ = canvas.copy(&tex, WHOLE, strh)
+	; let TxtTex { tex, strh } = TxtTex::new_default_font(txt.as_str(), sz as u16, ofst, col, &ttf, &mktex)
+	;	let _ = canvas.copy(&tex, WHOLE, middle_rect(strh))
 	;}
 
-	{	let TxtTex { tex: grass, strh } = TxtTex::new(
+	{	let TxtTex { tex: grass, strh } = TxtTex::new_default_font(
 			"00:00:00", 24,
 			Vec2u {x: 100,y: 10}, Color::GREEN,
-			NO_PATH, &ttf, &mktex
+			&ttf, &mktex
 		)
 	;	let _ = canvas.copy(&grass, WHOLE, strh)
 	;}
