@@ -39,9 +39,9 @@ fn main() {
 ### Do not indent switch statement.
 ```
 	// Window
-;	let video = sdl.video().unwrap()
+	let video = sdl.video().unwrap()
 ;	let window = video.window("rust-sdl2 demo", 800, 600).position_centered().build().unwrap();
-	let mut canvas = window.into_canvas().build().unwrap()
+;	let mut canvas = window.into_canvas().build().unwrap()
 ;	let mktex = canvas.texture_creator()
 ;
 	// Time
@@ -49,12 +49,12 @@ fn main() {
 ;
 	// Ttf
 	let ttf = ttf::init().unwrap()
+;
 ```
 ### Use comment to mark sections instead of turning into new functions. Unless you are going to reuse it at least 10 times. Or if it is important.
 main.rs:
 ```
-let TxtTex { tex, strh } = TxtTex::new(txt.as_str(), sz as u16, ofst, col, NO_PATH, &ttf, &mktex)
-;
+let TxtTex { tex, strh } = TxtTex::new(txt.as_str(), sz as u16, ofst, col, NO_PATH, &ttf, &mktex);
 ```
 sdl2_types.rs:
 ```
