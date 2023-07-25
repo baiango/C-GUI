@@ -14,7 +14,7 @@ pub const WHOLE: Option<Rect> = None;
 pub struct TxtTex<'a> {
 	pub tex: Texture<'a>
 ,	pub strh: Rect
-  }
+}
 impl TxtTex<'_> {
 	pub fn new<'a>(
 	str: &'a str, size: u16, offset: Vec2u, color: Color, font_path: &'a str,
@@ -37,17 +37,17 @@ impl TxtTex<'_> {
 	str: &'a str, size: u16, offset: Vec2u, color: Color,
 	ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{
-	Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
+		Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
 	 }
 
 	pub fn new_mid_df_fnt<'a>(
 	str: &'a str, size: u16, offset: Vec2u, color: Color,
 	ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{
-	let ret = Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
-;	return TxtTex{ tex: ret.tex, strh: middle_rect(ret.strh) }
-;	 }
-  }
+		let ret = Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
+	;	return TxtTex{ tex: ret.tex, strh: middle_rect(ret.strh) }
+	;}
+}
 
 
 pub fn middle_rect(strh: Rect) -> Rect { Rect::new(strh.x - (strh.w / 2), strh.y - (strh.h / 2), strh.w as u32, strh.h as u32) }
