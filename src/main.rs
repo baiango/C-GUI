@@ -1,7 +1,6 @@
 use string_join::Join;
 use sdl2::{pixels::Color, event::Event, ttf, rect::Rect, render::TextureQuery};
 
-
 mod ui {
 	pub mod sdl2_types;
 }
@@ -13,13 +12,13 @@ mod engine {
 use crate::engine::types::*;
 
 
-fn main()
-{	println!("Hi!\n")
+fn main() {
+	println!("Hi!\n")
 ;	let sdl = sdl2::init().unwrap()
 ;
 	// Window
 	let video = sdl.video().unwrap()
-;	let window = video.window("rust-sdl2 demo", 800, 600).position_centered().build().unwrap()
+;	let window = video.window("rust-sdl2 demo", 1366, 768).position_centered().build().unwrap()
 ;	let mut canvas = window.into_canvas().build().unwrap()
 ;	let mktex = canvas.texture_creator()
 ;
@@ -29,7 +28,7 @@ fn main()
 	// Ttf
 	let ttf = ttf::init().unwrap()
 ;
-		let mut event = sdl.event_pump().unwrap()
+	let mut event = sdl.event_pump().unwrap()
 ; 'quit: loop {
 		if let Some(e) = event.poll_event() {
 			match e {
@@ -56,11 +55,11 @@ fn main()
 	; let clock = Vec3u::expand_1d_to_3d(time.ticks(), 1000, 60)
 	; let txt = ":".join([clock.z.to_string(), clock.y.to_string(), clock.x.to_string()])
 
-	; let TxtTex { tex, strh } = TxtTex::new_default_font(txt.as_str(), sz as u16, ofst, col, &ttf, &mktex)
-	;	let _ = canvas.copy(&tex, WHOLE, middle_rect(strh))
+	; let TxtTex { tex, strh } = TxtTex::new_mid_df_fnt(txt.as_str(), sz as u16, ofst, col, &ttf, &mktex)
+	;	let _ = canvas.copy(&tex, WHOLE, strh)
 	;}
 
-	{	let TxtTex { tex: grass, strh } = TxtTex::new_default_font(
+	{	let TxtTex { tex: grass, strh } = TxtTex::new_df_fnt(
 			"00:00:00", 24,
 			Vec2u {x: 100,y: 10}, Color::GREEN,
 			&ttf, &mktex
@@ -71,4 +70,4 @@ fn main()
 	;	canvas.set_draw_color(Color::RGB(0x20, 0x20, 0x20))
 	;	canvas.clear()
 	;}
-}
+  }

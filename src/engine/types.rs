@@ -39,27 +39,45 @@ impl Vec2i
 	pub fn flat_2d_to_1d(vec: Vec2i, row: i32) -> i32 { vec.x + (vec.y * row) } }
 
 pub struct Vec2u { pub x: u32, pub y: u32 }
-impl Vec2u
-{	pub fn new(x: u32, y: u32) -> Vec2u { Vec2u{ x, y } } }
+impl Vec2u {
+	pub fn new(x: u32, y: u32) -> Vec2u { Vec2u{ x, y } }
+	pub fn expand_1d_to_3d(i: u32, row: u32) -> Vec2u { Vec2u{ x: i % row, y: i / row } }
+	pub fn flat_2d_to_1d(vec: Vec2u, row: u32) -> u32 { vec.x + (vec.y * row) }
+}
+
+pub struct Vec2f { pub x: f32, pub y: f32 }
+impl Vec2f {
+	pub fn new(x: f32, y: f32) -> Vec2f { Vec2f{ x, y } }
+	pub fn expand_1d_to_3d(i: f32, row: f32) -> Vec2f { Vec2f{ x: i % row, y: i / row } }
+	pub fn flat_2d_to_1d(vec: Vec2f, row: f32) -> f32 { vec.x + (vec.y * row) }
+}
 
 pub struct Vec3i { pub x: i32, pub y: i32, pub z: i32 }
-impl Vec3i
-{	pub fn new(x: i32, y: i32, z: i32) -> Vec3i { Vec3i{ x, y, z } }
+impl Vec3i {
+	pub fn new(x: i32, y: i32, z: i32) -> Vec3i { Vec3i{ x, y, z } }
 	pub fn expand_1d_to_3d(i: i32, row: i32, col: i32) -> Vec3i { Vec3i{ x: i % row, y: i / row % col, z: i / (row * col) } }
-	pub fn flat_3d_to_1d(vec: Vec3i, row: i32, col: i32) -> i32 { vec.x + (vec.y * row) + (vec.z * row * col) } }
+	pub fn flat_3d_to_1d(vec: Vec3i, row: i32, col: i32) -> i32 { vec.x + (vec.y * row) + (vec.z * row * col) }
+}
 
 pub struct Vec3u { pub x: u32, pub y: u32, pub z: u32 }
-impl Vec3u
-{	pub fn new(x: u32, y: u32, z: u32) -> Vec3u { Vec3u{ x, y, z } }
+impl Vec3u {
+	pub fn new(x: u32, y: u32, z: u32) -> Vec3u { Vec3u{ x, y, z } }
 	pub fn expand_1d_to_3d(i: u32, row: u32, col: u32) -> Vec3u { Vec3u{ x: i % row, y: i / row % col, z: i / (row * col) } }
-	pub fn flat_3d_to_1d(vec: Vec3u, row: u32, col: u32) -> u32 { vec.x + (vec.y * row) + (vec.z * row * col) } }
+	pub fn flat_3d_to_1d(vec: Vec3u, row: u32, col: u32) -> u32 { vec.x + (vec.y * row) + (vec.z * row * col) }
+}
 
+pub struct Vec3f { pub x: f32, pub y: f32, pub z: f32 }
+impl Vec3f {
+	pub fn new(x: f32, y: f32, z: f32) -> Vec3f { Vec3f{ x, y, z } }
+}
 
 #[derive(Debug, Clone, Copy)]
-pub struct Color8 { pub r: u8, pub g: u8, pub b: u8, pub a: u8}
-impl Color8
-{	pub fn new(r: u8, g: u8, b: u8, a: u8) -> Color8 { Color8{ r, g, b, a } } }
-pub const BLACK: Color8 = Color8{r: 0, g: 0, b: 0, a: 0};
+pub struct Col8 { pub r: u8, pub g: u8, pub b: u8, pub a: u8 }
+impl Col8 {
+	pub fn rgb(r: u8, g: u8, b: u8) -> Col8 { Col8 {r, g, b, a: 0xff} }
+	pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Col8 { Col8 { r, g, b, a } }
+}
+pub const BLACK: Col8 = Col8{r: 0, g: 0, b: 0, a: 0};
 /// So, Vec is a pointer located in stack that points to the heap.
 /// And Vec with Vec is a pointer to pointer to the heap.
 /// It's all over the place. We don't want that.
@@ -68,7 +86,10 @@ pub const BLACK: Color8 = Color8{r: 0, g: 0, b: 0, a: 0};
 pub struct Vec2d<T> { pub vec: Vec<T>, pub row: usize, pub col: usize }
 impl Vec2d<u8>
 {	pub fn new(row: usize, col: usize) -> Vec2d<u8> { Vec2d { vec: vec![0; row * col], row, col } }
-	pub fn get_index(&self, x: usize, y: usize) -> u8 { self.vec[x + (y * self.row)] } }
-impl Vec2d<Color8>
-{	pub fn new(row: usize, col: usize) -> Vec2d<Color8> { Vec2d { vec: vec![BLACK; row * col], row, col } }
-	pub fn get_index(&self, x: usize, y: usize) -> Color8 { self.vec[x + (y * self.row)] } }
+	pub fn get_index(&self, x: usize, y: usize) -> u8 { self.vec[x + (y * self.row)] }
+}
+impl Vec2d<Col8>
+{	pub fn new(row: usize, col: usize) -> Vec2d<Col8> { Vec2d { vec: vec![BLACK; row * col], row, col } }
+	pub fn get_index(&self, x: usize, y: usize) -> Col8 { self.vec[x + (y * self.row)] }
+}
+
