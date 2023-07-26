@@ -1,31 +1,48 @@
 package ODIN_GUI
 
 import "core:c"
-// The binding is outdated. So I fork Raylib and changed it.
-import rl "raylib"
+import "core:fmt"
+import SDL "vendor:sdl2"
+import TTF "sdl2_ttf"
 
 main :: proc() {
-// ;	flags: rl.ConfigFlags = 3
-;	rl.SetConfigFlags(rl.ConfigFlag.WINDOW_RESIZABLE)
-;	rl.InitWindow(1366, 768, "ODIN-GUI")
-;
-;	for !rl.WindowShouldClose() {
-	;	rl.BeginDrawing()
-	;	scene_1()
-	;	draw_txt_box({500, 500})
-	;	rl.EndDrawing()
-	}
-;	rl.CloseWindow()
-}
+	window_size := Vec2i{640, 480}
+	// VIDEO
+	check_err(SDL.Init(SDL.INIT_VIDEO))
+	defer SDL.Quit()
 
-scene_1 :: proc() {
-	;	rl.ClearBackground(rl.RAYWHITE)
-	;	aaa: cstring = "aaaaa!"
-	;	rl.DrawText("Congrats! You created your first window!", 190, 200, 20, rl.LIGHTGRAY)
-	;	rl.DrawText(aaa, 190, 240, 20, rl.LIGHTGRAY)
-	;	col := DARK_BLUE_Col8
-	;	rl.DrawRectangleRounded(
-		rect_to_rlrect(mov_rect({300, 180}, {30, 30, 180, 100})),
-		RD16_RECT.roundness, 0, col8_to_color(col)
+	window := SDL.CreateWindow(
+		"ODIN-GUI", SDL.WINDOWPOS_CENTERED, SDL.WINDOWPOS_CENTERED
+		window_size.x, window_size.y
+		SDL.WINDOW_RESIZABLE
 	)
+	check_err()
+	defer SDL.DestroyWindow(window)
+
+	renderer := SDL.CreateRenderer(window, -1, SDL.RENDERER_ACCELERATED)
+	check_err()
+	defer SDL.DestroyRenderer(renderer)
+
+	// TFF
+	TTF.Init()
+	check_err()
+
+	event: SDL.Event
+	quit: for {
+		if SDL.PollEvent(&event) {
+			#partial switch event.type
+			{case SDL.EventType.QUIT: break quit
+			}
+		} // if SDL.PollEvent(&event)
+		// Render: Start
+		draw_txt(pos={100, 200}, r_er=renderer)
+		draw_txt(txt="Here's some text!"
+			pos={32, window_size.y - 96 - 32}
+			pen_sz=96, r_er=renderer
+		)
+		// Render: End
+		SDL.RenderPresent(renderer)
+		SDL.SetRenderDrawColor(renderer, 0x20, 0x20, 0x20, 0)
+		SDL.RenderClear(renderer)
+	}
 }
