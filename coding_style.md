@@ -139,7 +139,7 @@ impl TxtTex<'_> {
 "if/else" just makes your code harder to read because of unpredictability. And sometimes slower to run too!  
 **Flag Arguments are prohibited.**  
 ### Name the functions in this order.
-Verb -> Noun  
+Verb -> Adjective -> Noun -> Data type
 Do: `fn middle_rect()`  
 Not: `fn rect_middle()`  
 ### Stick to Data-oriented programming and Pure function only.
@@ -188,4 +188,4 @@ struct Node { index: Vec<u32> } // L1
 struct Vec3f { x: f32, y: f32, z: f32 } // L1
 impl Vec3f { fn new(x: f32, y: f32, z: f32) -> Vec3f { Vec3f{ x, y, z } } }
 ```
-At this point, try not to inherit the `Player` struct unless it's impossible. or do it if it's much easier to track the inherents. The `Player` is nested 3 deep.
+At this point, try not to inherit the `Player` struct unless it's impossible. or do it if it's much easier to track the inherents. The `Player` is nested 3 level deep.
