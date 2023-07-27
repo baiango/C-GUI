@@ -10,4 +10,17 @@ I use C because of the simplicity, which is critical for GUI program. And Rust/C
 So Rust is only used for long computation time things/algorithms.
 
 # Coding style
-[Read here](coding_style.md)
+[Read here](coding_style.md)  
+
+# Memory-safety
+I take memory leaks very seriously. So please use [Intel Inspector](https://www.intel.com/content/www/us/en/docs/inspector/get-started-guide/2023-1/overview.html) to debug this software.  
+
+- There is no function that use pointers in this software except things that depends on Vulkan or external libraries or arrays.  
+At the cost of memory bandwidth because of copying the variables.  
+But this type of problem will usually get optimized by the compiler.  
+- `You need DDR5 to run this software.` I said that as a joke. 
+- if/else statement is rarely used to make this software very predictable.
+- Same input always return the same output because of the pure functions.
+- Writing unit test are much easier as you don't have to write it for if/else statement.  
+
+**So this software is very memory-safe.**  
