@@ -35,15 +35,18 @@ set_col5 :: proc(r, g, b: u8) -> Col5 {
 raw_col5_to_8 :: proc(using col5: Col5) -> Col8 {
 	return {
 		u8(0b11111 & rgb)
-		u8(0b11111 & (rgb / 32))
-		u8(0b11111 & (rgb / 1024))
+		u8(0b11111 & (rgb >> 5))
+		u8(0b11111 & (rgb >> 10))
 	}
 }
 col5_to_8 :: proc(using col5: Col5) -> Col8 {
 	return {
-		u8(math.floor_f32(min(31.0, f32(rgb))) * (255.0 / 31.0))
-		u8(math.floor_f32(min(31.0, f32(rgb) / 32.0)) * (255.0 / 31.0))
-		u8(math.floor_f32(min(31.0, f32(rgb) / 1024.0)) * (255.0 / 31.0))
+		// min(31, rgb) * (255.0 / 31)
+		// min(31, rgb / 32) * (255.0 / 31)
+		// min(31, rgb / 1024) * (255.0 / 31)
+		u8(f32(0b11111 & rgb) * 8.225)
+		u8(f32(0b11111 & (rgb >> 5)) * 8.225)
+		u8(f32(0b11111 & (rgb >> 10)) * 8.225)
 	}
 }
 
@@ -71,59 +74,7 @@ Tex2D :: struct {
 	pxs: []u8 // Variable sized array(Not Vector)
 }
 
-// SDL2 specific
-import "core:c"
-import SDL "vendor:sdl2"
-import TTF "sdl2_ttf"
-
-col8_to_SDL :: proc(using color: Col8) -> SDL.Color {
-	return { r, g, b, 0xff }
-}
-col5_to_SDL :: proc(color: Col5) -> SDL.Color {
-	return col8_to_SDL(col5_to_8(color))
-}
-
-get_txt_tex :: proc(
-	txt: cstring = "Hello!"
-	fnt_pt: cstring = "res/pixel-clear-condensed.ttf"
-	pos: Vec2i = {32, 32}
-	col: Col8 = {0xff, 0xff, 0xff}
-	pen_sz: c.int = 24
-	// Boilerplate
-	r_er: ^SDL.Renderer
-)	-> (^SDL.Texture, SDL.Rect) {
-	ttf := TTF.OpenFont(fnt_pt, pen_sz)
-	surface := TTF.RenderText_Solid(ttf, txt, col8_to_SDL(col))
-	texture := SDL.CreateTextureFromSurface(r_er, surface)
-	stretch := SDL.Rect{pos.x, pos.y, 0, 0}
-	SDL.QueryTexture(texture, nil, nil, &stretch.w, &stretch.h)
-	return texture, stretch
-}
-
-draw_tex :: proc(
-	txt: cstring = "Hello!"
-	fnt_pt: cstring = "res/pixel-clear-condensed.ttf"
-	pos: Vec2i = {32, 32}
-	col: Col8 = {0xff, 0xff, 0xff}
-	pen_sz: c.int = 24
-	// Boilerplate
-	r_er: ^SDL.Renderer
-)	{
-	texture, stretch := get_txt_tex(txt, fnt_pt, pos, col, pen_sz, r_er)
-	SDL.RenderCopy(r_er, texture, nil, &stretch)
-}
-
-place_middle :: proc(stretch, box: SDL.Rect) -> SDL.Rect {
-	return {
-		box.x - (stretch.w / 2) + (box.w / 2)
-		// Need to move down 1 px to make it look "middle".
-		box.y - (stretch.h / 2) + (box.h / 2) + 1
-		stretch.w, stretch.h
-	}
-}
-
-draw_circle :: proc(r_er: ^SDL.Renderer) {
-	canva: SDL.Surface
-	SDL.LockSurface(&canva)
-	SDL.UnlockSurface(&canva)
-}
+// Vulkan specific
+GLFW_NO_API :: 0
+GLFW_RESIZABLE :: 0x00020003
+GLFW_FALSE :: 0
