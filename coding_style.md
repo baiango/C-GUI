@@ -142,16 +142,15 @@ impl TxtTex<'_> {
 Verb -> Adjective -> Noun -> Data type
 Do: `fn middle_rect()`  
 Not: `fn rect_middle()`  
-### Stick to Data-oriented programming and Pure function only.
+### Stick to Column database and Pure function only.
 **Pure function is...**
 - It does not modify global variables.
 - It always return same value with the same input.
 - It does not have any `mut` keyword used on the function.  
 
-**Data-oriented programming is...**
+**Column database is...**
 - Let's say our type is `Rect`.
 - It warps `Rect` into `vec<Rect>` and use all of them without skipping one variable.
-- It make the vector looks like a database. Or it is a database.
 - You'll be running into memory bandwidth limit more easily with this. So please keep the data small.
 - It's perfect for physics engine. Since it calculate the object's transform 1000 times every frame.
 - It might be bad for readability. If it is, use pure function to write the functions instead.
