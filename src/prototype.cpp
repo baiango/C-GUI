@@ -17,11 +17,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData
 ) {
-
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
-	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
 		// Message is important enough to show
+		std::cerr << "Validation layer: " << pCallbackData->pMessage << "\n";
 	}
 
 	return VK_FALSE;
@@ -98,9 +96,17 @@ checked_validation_layer_support:
 
 
 	// 2b: Validation layers
+	VkDebugUtilsMessengerCreateInfoEXT debug_create_info{};
 	if (is_validation_layers_on) {
 		create_info.enabledLayerCount = (uint32_t)(validation_layers.size());
 		create_info.ppEnabledLayerNames = validation_layers.data();
+
+		debug_create_info = {};
+		debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debug_create_info.pfnUserCallback = debugCallback;
+		create_info.pNext = &debug_create_info;
 	} else {
 		create_info.enabledLayerCount = 0;
 	}
@@ -141,6 +147,7 @@ checked_validation_layer_support:
 	//	glfwPollEvents();
 	//}
 
+	// Cleanup
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();
