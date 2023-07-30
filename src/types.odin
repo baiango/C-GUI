@@ -113,6 +113,19 @@ draw_tex :: proc(
 	SDL.RenderCopy(r_er, texture, nil, &stretch)
 }
 
+get_txt_tex_ptr :: proc(
+	txt: ^cstring
+	fnt_pt: cstring = "res/pixel-clear-condensed.ttf"
+	pos: Vec2i = {32, 32}
+	col: Col8 = {0xff, 0xff, 0xff}
+	pen_sz: c.int = 24
+	// Boilerplate
+	r_er: ^SDL.Renderer
+)	-> (^SDL.Texture, SDL.Rect) {
+	texture, stretch := get_txt_tex(txt^, fnt_pt, pos, col, pen_sz, r_er)
+	return texture, stretch
+}
+
 place_middle :: proc(stretch, box: SDL.Rect) -> SDL.Rect {
 	return {
 		box.x - (stretch.w / 2) + (box.w / 2)
@@ -120,6 +133,10 @@ place_middle :: proc(stretch, box: SDL.Rect) -> SDL.Rect {
 		box.y - (stretch.h / 2) + (box.h / 2) + 1
 		stretch.w, stretch.h
 	}
+}
+
+SDL_mov_rect :: proc (mov: Vec2i, using pos: SDL.Rect) -> SDL.Rect {
+	return {x + mov.x, y + mov.y, w, h }
 }
 
 draw_circle :: proc(r_er: ^SDL.Renderer) {
