@@ -1,4 +1,4 @@
-#include "shader_class.hpp"
+#include "shader_compiler.hpp"
 
 
 string get_file_content(string file_name) {
@@ -17,6 +17,8 @@ string get_file_content(string file_name) {
 	return contents;
 }
 
+
+static GLuint shader_program;
 GLuint *init_shaders(string vertex_file, string fragment_file) {
 	string tmp_vertex = get_file_content(vertex_file);
 	string tmp_fragment = get_file_content(fragment_file);
@@ -24,41 +26,41 @@ GLuint *init_shaders(string vertex_file, string fragment_file) {
 	const char *fragment_source = tmp_fragment.c_str();
 
 	// Compile shaders
+	GLint success;
+	GLchar info_log[512];
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	checkGLError();
 	glShaderSource(vertex_shader, 1, &vertex_source, nullptr);
-	checkGLError();
 	glCompileShader(vertex_shader);
-	checkGLError();
+
+	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
+		cout << "Vertex didn't compile!: " << info_log << "\n";
+	}
+
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	checkGLError();
 	glShaderSource(fragment_shader, 1, &fragment_source, nullptr);
-	checkGLError();
 	glCompileShader(fragment_shader);
-	checkGLError();
 
-	GLuint shader_program = glCreateProgram();
-	checkGLError();
+	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glGetShaderInfoLog(fragment_shader, 512, nullptr, info_log);
+		cout << "Fragment didn't compile!: " << info_log << "\n";
+	}
+
+
+	shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
-	checkGLError();
 	glAttachShader(shader_program, fragment_shader);
-	checkGLError();
 	glLinkProgram(shader_program);
-	checkGLError();
 
 	glDeleteShader(vertex_shader);
-	checkGLError();
 	glDeleteShader(fragment_shader);
-	checkGLError();
 
 	return &shader_program;
 }
 
-void checkGLError()
-{
-	GLenum err;
-	while ((err = glGetError()) != GL_NO_ERROR) {
-		std::cout << err;
-	}
+void checkGLError() {
+	while (GLenum err = glGetError()) { cout << err << "\n"; }
 }

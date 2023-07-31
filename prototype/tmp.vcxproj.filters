@@ -21,12 +21,12 @@
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader_class.cpp">
+    <ClCompile Include="shader_compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader_class.hpp">
+    <ClInclude Include="shader_compiler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

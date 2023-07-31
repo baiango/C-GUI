@@ -3,3 +3,5 @@ ref
 *.exe
 *.pdb
 src/Intel® VTune™ Profiler Results
+prototype/.vs
+prototype/x64

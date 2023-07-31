@@ -1,19 +1,19 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "shader_compiler.hpp"
 #include <iostream>
-#include "shader_class.hpp"
 using std::cout;
 
 
 int main() {
-	glfwInit();
+	if (!glfwInit()) { cout << "GLFW init failed"; }
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Init window
 	GLFWwindow *window = glfwCreateWindow(800, 600, "C++ OpenGL 3.3", nullptr, nullptr);
-	if (nullptr == window) {
+	if (!window) {
 		cout << "Failed to create GLFW window\n";
 		glfwTerminate();
 		return -1;
@@ -41,35 +41,21 @@ int main() {
 
 	// Bind array
 	GLuint VAO, VBO, EBO;
-	checkGLError();
 	glGenVertexArrays(1, &VAO);
-	checkGLError();
 	glGenBuffers(1, &VBO);
-	checkGLError();
 	glGenBuffers(1, &EBO);
-	checkGLError();
 	glBindVertexArray(VAO);
-	checkGLError();
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	checkGLError();
 	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-	checkGLError();
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	checkGLError();
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
-	checkGLError();
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof GLuint, nullptr);
-	checkGLError();
 	glEnableVertexAttribArray(0);
-	checkGLError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	checkGLError();
 	glBindVertexArray(0);
-	checkGLError();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	checkGLError();
 
 	// Main loop
 	glUseProgram(shader_program);

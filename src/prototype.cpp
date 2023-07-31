@@ -1,94 +1,154 @@
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-using std::cout;
+#include <vulkan/vulkan.h>
 
-const char *vertex_source =
-"#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main() {\n"
-"\tgl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\n\0";
-const char *fragment_source =
-"#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main() {\n"
-"FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
-"}\n\0";
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+
+#include <iostream>
+#include <vector>
+using std::vector;
+
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+	VkDebugUtilsMessageTypeFlagsEXT messageType,
+	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+	void* pUserData
+) {
+	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+		// Message is important enough to show
+		std::cerr << "Validation layer: " << pCallbackData->pMessage << "\n";
+	}
+
+	return VK_FALSE;
+}
 
 int main() {
+	using std::cout;
+	std::cout << "Hello World!\n";
 	glfwInit();
+	// GLFW_NO_API means no OpenGL api. That leaves Vulkan api to you only.
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	uint32_t WIDTH = 800, HEIGHT = 600;
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Hello Vulkan!", nullptr, nullptr);
 
-	// Init window
-	GLFWwindow *window = glfwCreateWindow(800, 600, "C++ OpenGL 3.3", nullptr, nullptr);
-	if (nullptr == window) {
-		cout << "Failed to create GLFW window\n";
-		glfwTerminate();
-		return -1;
+
+
+	// 2a: Validation layers
+	vector<const char*> validation_layers = { "VK_LAYER_KHRONOS_validation" };
+	bool is_validation_layer_supported = false;
+#ifdef NDEBUG
+	bool is_validation_layers_on = false;
+#else
+	bool is_validation_layers_on = true;
+#endif
+	// checkValidationLayerSupport()
+{
+	uint32_t layer_cout;
+	vkEnumerateInstanceLayerProperties(&layer_cout, nullptr);
+
+	vector<VkLayerProperties> available_layers(layer_cout);
+	vkEnumerateInstanceLayerProperties(&layer_cout, available_layers.data());
+
+	for (const char* layer_name : validation_layers) {
+		for (const auto& layer_properties : available_layers) {
+			if (strcmp(layer_name, layer_properties.layerName) == 0) {
+				is_validation_layer_supported = true;
+				goto checked_validation_layer_support;
+			}
+		}
 	}
-	glfwMakeContextCurrent(window);
-	gladLoadGL();
-	glViewport(0, 0, 800, 600);
-
-
-	// Compile shaders
-	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &vertex_source, nullptr);
-	glCompileShader(vertex_shader);
-
-	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &fragment_source, nullptr);
-	glCompileShader(fragment_shader);
-
-	GLuint shader_program = glCreateProgram();
-	glAttachShader(shader_program, vertex_shader);
-	glAttachShader(shader_program, fragment_shader);
-	glLinkProgram(shader_program);
-
-	glDeleteShader(vertex_shader);
-	glDeleteShader(fragment_shader);
-
-	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,
-	};
-
-	// Bind array
-	GLuint VAO, VBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	// Main loop
-	GLfloat bg_col = (1.0f / 0xff) * 0x20;
-	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-
-		glUseProgram(shader_program);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		glfwSwapBuffers(window);
-		glClearColor(bg_col, bg_col, bg_col, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+}
+checked_validation_layer_support:
+	if (is_validation_layers_on && is_validation_layer_supported) {
+		cout << "Validation layers is available!\n";
+	} else {
+		cout << "Validation layers requested, but not available!\n";
 	}
+
+
+
+	// 1: Instance
+	VkInstance instance;
+	VkApplicationInfo app_info{};
+	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	app_info.pApplicationName = "Hello Triangle";
+	app_info.applicationVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
+	app_info.pEngineName = "No engine";
+	app_info.engineVersion = VK_MAKE_API_VERSION(1, 0, 0, 0);
+	app_info.apiVersion = VK_API_VERSION_1_0;
+
+	VkInstanceCreateInfo create_info{};
+	uint32_t glfw_ext_cout = 0;
+	const char** glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_ext_cout);
+	create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	create_info.pApplicationInfo = &app_info;
+
+	create_info.enabledExtensionCount = glfw_ext_cout;
+	create_info.ppEnabledExtensionNames = glfw_extensions;
+
+	create_info.enabledLayerCount = 0;
+
+
+
+	// 2b: Validation layers
+	VkDebugUtilsMessengerCreateInfoEXT debug_create_info{};
+	if (is_validation_layers_on) {
+		create_info.enabledLayerCount = (uint32_t)(validation_layers.size());
+		create_info.ppEnabledLayerNames = validation_layers.data();
+
+		debug_create_info = {};
+		debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+		debug_create_info.pfnUserCallback = debugCallback;
+		create_info.pNext = &debug_create_info;
+	} else {
+		create_info.enabledLayerCount = 0;
+	}
+
+	// getRequiredExtensions()
+	vector<const char*> extensions;
+{
+	uint32_t glfw_ext_cout = 0;
+	const char** glfw_exts;
+	glfw_exts = glfwGetRequiredInstanceExtensions(&glfw_ext_cout);
+
+	vector<const char*> extensions(glfw_exts, glfw_exts + glfw_ext_cout);
+
+	if (is_validation_layers_on) {
+		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
+}
+
+	create_info.enabledExtensionCount = (uint32_t)(extensions.size());
+	create_info.ppEnabledExtensionNames = extensions.data();
+	// 50%
+
+
+	// Window
+	VkResult result = vkCreateInstance(&create_info, nullptr, &instance);
+	if (VK_SUCCESS != result) { cout << "Failed to create instance! " << result; }
+
+	uint32_t extCout = 0;
+	vkEnumerateInstanceExtensionProperties(nullptr, &extCout, nullptr);
+	using std::cout;
+	cout << extCout << " extensions supported.\n";
+
+	glm::mat4 matrix;
+	glm::vec4 vec;
+	auto test = matrix * vec;
+
+	//while (!glfwWindowShouldClose(window)) {
+	//	glfwPollEvents();
+	//}
 
 	// Cleanup
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteProgram(shader_program);
+	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
