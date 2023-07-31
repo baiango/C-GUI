@@ -1,9 +1,13 @@
 #include "shader_class.hpp"
 
+
 string get_file_content(string file_name) {
 	std::ifstream file(file_name, std::ios::binary);
 
-	if (!file) { throw errno; }
+	if (!file) {
+		cout << "Missing '" << file_name << "'!";
+		exit(-1);
+	}
 	string contents;
 	file.seekg(0, std::ios::end);
 	contents.resize(file.tellg());
@@ -21,20 +25,40 @@ GLuint *init_shaders(string vertex_file, string fragment_file) {
 
 	// Compile shaders
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	checkGLError();
 	glShaderSource(vertex_shader, 1, &vertex_source, nullptr);
+	checkGLError();
 	glCompileShader(vertex_shader);
+	checkGLError();
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	checkGLError();
 	glShaderSource(fragment_shader, 1, &fragment_source, nullptr);
+	checkGLError();
 	glCompileShader(fragment_shader);
+	checkGLError();
 
 	GLuint shader_program = glCreateProgram();
+	checkGLError();
 	glAttachShader(shader_program, vertex_shader);
+	checkGLError();
 	glAttachShader(shader_program, fragment_shader);
+	checkGLError();
 	glLinkProgram(shader_program);
+	checkGLError();
 
 	glDeleteShader(vertex_shader);
+	checkGLError();
 	glDeleteShader(fragment_shader);
+	checkGLError();
 
 	return &shader_program;
+}
+
+void checkGLError()
+{
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		std::cout << err;
+	}
 }

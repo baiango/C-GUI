@@ -41,21 +41,35 @@ int main() {
 
 	// Bind array
 	GLuint VAO, VBO, EBO;
+	checkGLError();
 	glGenVertexArrays(1, &VAO);
+	checkGLError();
 	glGenBuffers(1, &VBO);
+	checkGLError();
 	glGenBuffers(1, &EBO);
+	checkGLError();
 	glBindVertexArray(VAO);
+	checkGLError();
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	checkGLError();
 	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
+	checkGLError();
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	checkGLError();
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
+	checkGLError();
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof GLuint, nullptr);
+	checkGLError();
 	glEnableVertexAttribArray(0);
+	checkGLError();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	checkGLError();
 	glBindVertexArray(0);
+	checkGLError();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	checkGLError();
 
 	// Main loop
 	glUseProgram(shader_program);
