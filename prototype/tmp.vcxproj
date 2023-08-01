@@ -147,12 +147,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="engine\rgb.cpp" />
+    <ClCompile Include="engine\shader_compiler.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="prototype.cpp" />
-    <ClCompile Include="shader_compiler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader_compiler.hpp" />
+    <ClInclude Include="engine\rgb.hpp" />
+    <ClInclude Include="engine\shader_compiler.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

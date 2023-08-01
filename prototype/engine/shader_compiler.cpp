@@ -18,8 +18,7 @@ string get_file_content(string file_name) {
 }
 
 
-static GLuint shader_program;
-GLuint *init_shaders(string vertex_file, string fragment_file) {
+GLuint init_shaders(string vertex_file, string fragment_file) {
 	string tmp_vertex = get_file_content(vertex_file);
 	string tmp_fragment = get_file_content(fragment_file);
 	const char *vertex_source = tmp_vertex.c_str();
@@ -48,23 +47,31 @@ GLuint *init_shaders(string vertex_file, string fragment_file) {
 		cout << "Fragment didn't compile!: " << info_log << "\n";
 	}
 
-	shader_program = glCreateProgram();
+	GLuint shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, fragment_shader);
 	glLinkProgram(shader_program);
 
-	glGetShaderiv(shader_program, GL_COMPILE_STATUS, &has_compiled);
+	glGetProgramiv(shader_program, GL_LINK_STATUS, &has_compiled);
 	if (GL_FALSE == has_compiled) {
 		glGetShaderInfoLog(shader_program, 1024, nullptr, info_log);
-		cout << "Vertex didn't compile!: " << info_log << "\n";
+		cout << "Shader program didn't link!: " << info_log << "\n";
 	}
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
 
-	return &shader_program;
+	return shader_program;
 }
 
-void getGLError() {
+void prtGLError() {
 	while (GLenum err = glGetError()) { cout << err << "\n"; }
+}
+
+void unbindAll() {
+	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glUseProgram(0);
 }
