@@ -22,15 +22,13 @@ int main() {
 	gladLoadGL();
 	glViewport(0, 0, 800, 600);
 
-	GLuint shader_program = *init_shaders("shader.vert", "shader.frag");
-
 	GLfloat vertices[] = {
-		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower left corner
-		0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // Lower right corner
-		0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // Upper corner
-		-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner left
-		0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, // Inner right
-		0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
+		-0.5f,    -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.2f,  // Lower left corner
+		0.5f,     -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.2f,  // Lower right corner
+		0.0f,      0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 1.0f, 0.6f,  0.32f, // Upper corner
+		-0.5f / 2, 0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.46f, 0.17f, // Inner left
+		0.5f / 2,  0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.46f, 0.17f, // Inner right
+		0.0f,     -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.02f  // Inner down
 	};
 
 	GLuint indices[] = {
@@ -39,33 +37,47 @@ int main() {
 		5, 4, 1 // Lower right triangle
 	};
 
-	// Bind array
 	GLuint VAO, VBO, EBO;
+	// VAO new
 	glGenVertexArrays(1, &VAO);
+
+	// VBO bind
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-	glBindVertexArray(VAO);
+	glBindVertexArray(VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
 
+	// VAO new part 2
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, nullptr);
+	glEnableVertexAttribArray(VAO);
+
+	// EBO new
+	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof GLuint, nullptr);
+	// Color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, (void*)(3 * sizeof GLfloat));
+
+	// Unbind
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	// Main loop
+	GLfloat bg_col = (1.0f / 0xff) * 0x20;
+
+	GLuint shader_program = *init_shaders("shader.vert", "shader.frag");
 	glUseProgram(shader_program);
 	glBindVertexArray(VAO);
+	GLuint scale = glGetUniformLocation(shader_program, "scale");
+	glUniform1f(scale, 0.5f);
 
-	GLfloat bg_col = (1.0f / 0xff) * 0x20;
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3 * sizeof GLuint, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glClearColor(bg_col, bg_col, bg_col, 1.0f);

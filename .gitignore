@@ -5,3 +5,5 @@ ref
 src/Intel® VTune™ Profiler Results
 prototype/.vs
 prototype/x64
+*.inspxeproj
+prototype/r***

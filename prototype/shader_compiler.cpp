@@ -25,35 +25,39 @@ GLuint *init_shaders(string vertex_file, string fragment_file) {
 	const char *vertex_source = tmp_vertex.c_str();
 	const char *fragment_source = tmp_fragment.c_str();
 
+	GLint has_compiled;
+	GLchar info_log[1024];
 	// Compile shaders
-	GLint success;
-	GLchar info_log[512];
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex_shader, 1, &vertex_source, nullptr);
 	glCompileShader(vertex_shader);
 
-	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertex_shader, 512, nullptr, info_log);
+	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &has_compiled);
+	if (GL_FALSE == has_compiled) {
+		glGetShaderInfoLog(vertex_shader, 1024, nullptr, info_log);
 		cout << "Vertex didn't compile!: " << info_log << "\n";
 	}
-
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment_shader, 1, &fragment_source, nullptr);
 	glCompileShader(fragment_shader);
 
-	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragment_shader, 512, nullptr, info_log);
+	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &has_compiled);
+	if (GL_FALSE == has_compiled) {
+		glGetShaderInfoLog(fragment_shader, 1024, nullptr, info_log);
 		cout << "Fragment didn't compile!: " << info_log << "\n";
 	}
-
 
 	shader_program = glCreateProgram();
 	glAttachShader(shader_program, vertex_shader);
 	glAttachShader(shader_program, fragment_shader);
 	glLinkProgram(shader_program);
+
+	glGetShaderiv(shader_program, GL_COMPILE_STATUS, &has_compiled);
+	if (GL_FALSE == has_compiled) {
+		glGetShaderInfoLog(shader_program, 1024, nullptr, info_log);
+		cout << "Vertex didn't compile!: " << info_log << "\n";
+	}
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
@@ -61,6 +65,6 @@ GLuint *init_shaders(string vertex_file, string fragment_file) {
 	return &shader_program;
 }
 
-void checkGLError() {
+void getGLError() {
 	while (GLenum err = glGetError()) { cout << err << "\n"; }
 }

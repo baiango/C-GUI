@@ -10,4 +10,4 @@ using std::string;
 
 string get_file_content(string file_name);
 GLuint *init_shaders(string vertex_file, string fragment_file);
-void checkGLError();
+void getGLError();
