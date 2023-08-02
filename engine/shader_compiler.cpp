@@ -65,7 +65,8 @@ GLuint init_shaders(string vertex_file, string fragment_file) {
 }
 
 void prtGLError() {
-	while (GLenum err = glGetError()) { cout << err << "\n"; }
+	GLenum err = glGetError();
+	if (GL_NO_ERROR != err) { cout << err << "\n"; }
 }
 
 void unbindAll() {

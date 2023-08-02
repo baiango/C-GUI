@@ -188,3 +188,9 @@ struct Vec3f { x: f32, y: f32, z: f32 } // L1
 impl Vec3f { fn new(x: f32, y: f32, z: f32) -> Vec3f { Vec3f{ x, y, z } } }
 ```
 At this point, try not to inherit the `Player` struct unless it's impossible. or do it if it's much easier to track the inherents. The `Player` is nested 3 level deep.
+
+# For C++
+### Boost is banned from this project.  
+It's already really easy to write puzzling code with the STL. Let alone Boost, it has awfully nested deeply namespace. and the compiler don't even include Boost too! So you have to install it.  
+The Boost functions are too generic to be fast. It would be run much faster if you roll your own algorithms with the STL instead. Or writing codes in C style on C++.  
+Use C++20 STL only.

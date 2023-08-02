@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="prototype.cpp">
+    <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\rgb.cpp">
@@ -30,10 +30,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\rgb.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\shader_compiler.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\image.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader\image.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader\shader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shader\shader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
