@@ -13,41 +13,76 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{7ad7394d-4984-4007-a53b-a3cb15e009b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\external">
+      <UniqueIdentifier>{a6fe9e00-5a2a-457c-964e-721fd0b83999}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{42085fc6-d0a3-4674-a92f-713b5c6983b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\rgb.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="engine\shader_compiler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="engine\shader_controller.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="external\source\glad.c">
+      <Filter>Source Files\external</Filter>
+    </ClCompile>
+    <ClCompile Include="external\source\stb_image.c">
+      <Filter>Source Files\external</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\rgb.hpp">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\shader_compiler.hpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="engine\shader_controller.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\types.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\source\stb_image.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\image.frag">
-      <Filter>Source Files</Filter>
+    <None Include="engine\shaders\image.frag">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shader\image.vert">
-      <Filter>Source Files</Filter>
+    <None Include="engine\shaders\image.vert">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shader\shader.frag">
-      <Filter>Source Files</Filter>
+    <None Include="engine\shaders\rdrect.frag">
+      <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="shader\shader.vert">
-      <Filter>Source Files</Filter>
+    <None Include="engine\shaders\rdrect.vert">
+      <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="engine\shaders\shader.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="engine\shaders\shader.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="engine\shaders\pyramid.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="engine\shaders\pyramid.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="engine\image\brick.png">
+      <Filter>Source Files\engine</Filter>
+    </Image>
   </ItemGroup>
 </Project>

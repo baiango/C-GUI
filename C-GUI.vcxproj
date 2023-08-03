@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{ad2a1653-9480-4c10-873f-084fc038b93f}</ProjectGuid>
-    <RootNamespace>aaa</RootNamespace>
+    <RootNamespace>C-GUI</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
-    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
-    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
-    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
-    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -92,6 +92,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,6 +109,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,6 +126,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,19 +156,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="engine\rgb.cpp" />
-    <ClCompile Include="engine\shader_compiler.cpp" />
-    <ClCompile Include="glad.c" />
+    <ClCompile Include="engine\shader_controller.cpp" />
+    <ClCompile Include="external\source\glad.c" />
+    <ClCompile Include="external\source\stb_image.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\rgb.hpp" />
-    <ClInclude Include="engine\shader_compiler.hpp" />
+    <ClInclude Include="engine\shader_controller.hpp" />
+    <ClInclude Include="engine\types.hpp" />
+    <ClInclude Include="external\source\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\image.frag" />
-    <None Include="shader\image.vert" />
-    <None Include="shader\shader.frag" />
-    <None Include="shader\shader.vert" />
+    <None Include="engine\shaders\image.frag" />
+    <None Include="engine\shaders\image.vert" />
+    <None Include="engine\shaders\pyramid.frag" />
+    <None Include="engine\shaders\pyramid.vert" />
+    <None Include="engine\shaders\rdrect.frag" />
+    <None Include="engine\shaders\rdrect.vert" />
+    <None Include="engine\shaders\shader.frag" />
+    <None Include="engine\shaders\shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="engine\image\brick.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
