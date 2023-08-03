@@ -152,10 +152,33 @@ Not: `fn rect_middle()`
 
 **Column database is...**
 - Let's say our type is `Rect`.
-- It warps `Rect` into `vec<Rect>` and use all of them without skipping one variable.
+- It warps `Rect` into `vec<Rect.x, Rect.y, Rect.w, Rect.h>` and use all of them without skipping one variable.
 - You'll be running into memory bandwidth limit more easily with this. So please keep the data small.
 - It's perfect for physics engine. Since it calculate the object's transform 1000 times every frame.
-- It might be bad for readability. If it is, use pure function to write the functions instead.
+- It might be bad for readability. If it is, use pure function to write the functions instead.  
+
+Column database:
+```
+struct Nodes { vector<struct Vec3f> position, scale, rotation; };
+
+struct Nodes nodes;
+
+nodes.position = {0, 0, 0}, {1, 0, 0}, {0, 1, 1}, {0, 1, 0};
+nodes.scale = {0, 0, 0}, {3, 3, 3}, {1, 1, 1}, {1, 1, 1};
+nodes.rotation = {0, 0, 0}, {0, 0, 270}, {90, 0, 0}, {0, 0, 0};
+```
+Row database/Object-oriented programming:
+```
+struct Node { struct Vec3f position, scale, rotation; };
+
+vector<struct Node> nodes;
+// position / scale / rotation //
+{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, 
+{{1, 0, 0}, {3, 3, 3}, {0, 0, 270}},
+{{0, 1, 1}, {1, 1, 1}, {90, 0, 0}},
+{{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}
+```
+![cache locality](https://github.com/baiango/C-GUI/assets/105705580/e16b2ceb-43f2-41a2-b781-a95a749e9197)
 
 ### Do not nest struct more than 4 times deep.  
 **Example 1**
