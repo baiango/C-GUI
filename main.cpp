@@ -30,9 +30,9 @@ int main() {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // Vsync
 	gladLoadGL();
-	glViewport(0, 0, win_sz.x, win_sz.y);
 	// Make alpha available
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glViewport(0, 0, win_sz.x, win_sz.y);
 
 	// 3D
 	GLfloat pyramid_vertices[] = {
@@ -85,7 +85,7 @@ int main() {
 	Vec2i img_sz;
 	int32_t img_col_ch;
 	stbi_set_flip_vertically_on_load(true);
-	uint8_t* brick_bytes = stbi_load("engine/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
+	uint8_t *brick_bytes = stbi_load("engine/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_sz.x, img_sz.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, brick_bytes);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -152,10 +152,10 @@ int main() {
 
 	// Photo
 	GLfloat vertices2[] = {
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f,  -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f,   0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-1.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f,  -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f,   0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
 	};
 
 	GLuint indices2[] = {
@@ -227,14 +227,24 @@ int main() {
 	double previous_time = glfwGetTime();
 
 	unbindAll();
+	struct Vec2i win_sz2 = {0, 0};
 	while (!glfwWindowShouldClose(window)) {
 		// Init
+		glfwGetFramebufferSize(window, (int*)&win_sz.x, (int*)&win_sz.y);
+		glViewport(0, 0, win_sz.x, win_sz.y);
 		glfwPollEvents();
-		perspective cam;
+		struct perspective cam;
 		cam.model = glm::rotate(cam.model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 		cam.view = glm::translate(cam.view, glm::vec3(0.0f, 0.0f, -2.0f));
 		cam.proj = glm::perspective(
-			glm::radians(45.0f), (float)(win_sz.x / win_sz.y), 0.01f, 100.0f
+			glm::radians(45.0f), (float)win_sz.x / (float)win_sz.y, 0.01f, 100.0f
+		);
+
+		struct perspective cam_2D;
+		cam_2D.model = glm::rotate(cam_2D.model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		cam_2D.view = glm::translate(cam_2D.view, glm::vec3(0.0f, 0.0f, -2.0f));
+		cam_2D.proj = glm::perspective(
+			glm::radians(45.0f), (float)win_sz.x / (float)win_sz.y, 0.01f, 100.0f
 		);
 
 		double current_time =	glfwGetTime();
@@ -257,20 +267,20 @@ int main() {
 		// 2d
 		// Rainbow square
 		glUseProgram(shader_program_image);
-		update_view(shader_program_image, &cam);
+		update_view(shader_program_image, &cam_2D);
 		glBindVertexArray(VAO2);
 		glDrawElements(GL_TRIANGLES, sizeof indices2, GL_UNSIGNED_INT, nullptr);
 
 		// Triangles
 		glUseProgram(shader_program);
-		update_view(shader_program, &cam);
+		update_view(shader_program, &cam_2D);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof indices, GL_UNSIGNED_INT, nullptr);
 
 		// Round rectangle
 		glEnable(GL_BLEND);
 		glUseProgram(shader_program_rdrect);
-		update_view(shader_program_rdrect, &cam);
+		update_view(shader_program_rdrect, &cam_2D);
 		glBindVertexArray(VAO3);
 		glDrawElements(GL_TRIANGLES, sizeof indices3, GL_UNSIGNED_INT, nullptr);
 		glDisable(GL_BLEND);
