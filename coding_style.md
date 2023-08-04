@@ -178,7 +178,8 @@ vector<struct Node> nodes;
 {{0, 1, 1}, {1, 1, 1}, {90, 0, 0}},
 {{0, 1, 0}, {1, 1, 1}, {0, 0, 0}}
 ```
-![cache locality](https://github.com/baiango/C-GUI/assets/105705580/e16b2ceb-43f2-41a2-b781-a95a749e9197)
+![cache locality](https://github.com/baiango/C-GUI/assets/105705580/e03b3a31-2b72-48e6-9d6a-6997f4a7a2a3)
+
 
 ### Do not nest struct more than 4 times deep.  
 **Example 1**
