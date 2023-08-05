@@ -156,14 +156,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="engine\rgb.cpp" />
-    <ClCompile Include="engine\shader_controller.cpp" />
+    <ClCompile Include="engine\shader_ctrl.cpp" />
     <ClCompile Include="external\source\glad.c" />
     <ClCompile Include="external\source\stb_image.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\rgb.hpp" />
-    <ClInclude Include="engine\shader_controller.hpp" />
+    <ClInclude Include="engine\shader_ctrl.hpp" />
     <ClInclude Include="engine\types.hpp" />
     <ClInclude Include="external\source\stb_image.h" />
   </ItemGroup>

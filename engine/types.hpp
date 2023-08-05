@@ -6,6 +6,9 @@
 
 struct Vec2i { int32_t x, y; };
 struct Vec2u { uint32_t x, y; };
+struct Vec2f32 { float_t x, y; };
+struct Vec2f64 { double_t x, y; };
+
 struct Vec3i { int32_t x, y, z; };
 struct Vec3u { uint32_t x, y, z; };
 

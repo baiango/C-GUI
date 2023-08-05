@@ -1,4 +1,4 @@
-﻿#include "shader_controller.hpp"
+﻿#include "shader_ctrl.hpp"
 #include <iostream>
 using std::cout;
 #include <string>
@@ -6,7 +6,7 @@ using std::string;
 #include <fstream>
 
 
-string get_file_content(string file_name) {
+string cgui_get_file_content(string file_name) {
 	std::ifstream file(file_name, std::ios::binary);
 
 	if (!file) {
@@ -23,9 +23,9 @@ string get_file_content(string file_name) {
 }
 
 
-GLuint init_shaders(string vertex_file, string fragment_file) {
-	string tmp_vertex = get_file_content(vertex_file);
-	string tmp_fragment = get_file_content(fragment_file);
+GLuint cgui_init_shaders(string vertex_file, string fragment_file) {
+	string tmp_vertex = cgui_get_file_content(vertex_file);
+	string tmp_fragment = cgui_get_file_content(fragment_file);
 	const char *vertex_source = tmp_vertex.c_str();
 	const char *fragment_source = tmp_fragment.c_str();
 
@@ -39,7 +39,7 @@ GLuint init_shaders(string vertex_file, string fragment_file) {
 	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &has_compiled);
 	if (GL_FALSE == has_compiled) {
 		glGetShaderInfoLog(vertex_shader, 1024, nullptr, info_log);
-		cout << "Vertex didn't compile!: " << info_log;
+		cout << "Vertex didn't compile!\n" << info_log;
 	}
 
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -49,7 +49,7 @@ GLuint init_shaders(string vertex_file, string fragment_file) {
 	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &has_compiled);
 	if (GL_FALSE == has_compiled) {
 		glGetShaderInfoLog(fragment_shader, 1024, nullptr, info_log);
-		cout << "Fragment didn't compile!: " << info_log;
+		cout << "Fragment didn't compile!\n" << info_log;
 	}
 
 	GLuint shader_program = glCreateProgram();
@@ -60,7 +60,7 @@ GLuint init_shaders(string vertex_file, string fragment_file) {
 	glGetProgramiv(shader_program, GL_LINK_STATUS, &has_compiled);
 	if (GL_FALSE == has_compiled) {
 		glGetShaderInfoLog(shader_program, 1024, nullptr, info_log);
-		cout << "Shader program didn't link!: " << info_log;
+		cout << "Shader program didn't link!\n" << info_log;
 	}
 
 	glDeleteShader(vertex_shader);
@@ -69,12 +69,12 @@ GLuint init_shaders(string vertex_file, string fragment_file) {
 	return shader_program;
 }
 
-void prtGLError() {
+void cgui_prtGLError() {
 	GLenum err = glGetError();
 	if (GL_NO_ERROR != err) { cout << err << "\n"; }
 }
 
-void unbindAll() {
+void cgui_unbindAll() {
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -84,7 +84,7 @@ void unbindAll() {
 }
 
 
-void update_view(GLuint shader_program, perspective *camera) {
+void cgui_shader_update_view(GLuint shader_program, perspective *camera) {
 	GLuint uni_model = glGetUniformLocation(shader_program, "model");
 	glUniformMatrix4fv(uni_model, 1, GL_FALSE, glm::value_ptr(camera->model));
 	GLuint uni_view = glGetUniformLocation(shader_program, "view");
