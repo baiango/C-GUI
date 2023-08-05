@@ -228,33 +228,21 @@ int main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Normal
 
 	// Camera
-	struct perspective cam3D, cam2D;
+	struct perspective cam2D, cam3D;
+	struct Vec2f32 cam2D_scale = { 2.0f, 2.0f };
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
-	double speed = 0.05;
+	double_t speed = 0.05;
 
 	cam2D.view = glm::translate(cam2D.view, glm::vec3(0.0f, 0.0f, -2.0f));
-	cam2D.proj = glm::perspective(0.0f, aspect_ratio, 0.01f, 100.0f);
-
 	cam3D.view = glm::translate(cam3D.view, glm::vec3(0.0f, 0.0f, -2.0f));
 	cam3D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
 
 	cgui_prtGLError();
 	cgui_unbindAll();
+
 	while (!glfwWindowShouldClose(window)) {
-		// Loop
-		glfwGetFramebufferSize(window, (int*)&win_sz.x, (int*)&win_sz.y);
-		glViewport(0, 0, win_sz.x, win_sz.y);
+		// Input
 		glfwPollEvents();
-		aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
-
-		cam3D.view = glm::translate(cam3D.view, glm::vec3(
-			(glfwGetKey(window, GLFW_KEY_A) - glfwGetKey(window, GLFW_KEY_D)) * speed,
-			0.0f,
-			(glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S)) * speed
-		));
-		cam2D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
-		cam3D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
-
 		int cursor_state =
 			GLFW_PRESS == glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) ?
 			GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
@@ -264,8 +252,23 @@ int main() {
 			glfwSetCursorPos(window, win_sz.x / 2.0, win_sz.y / 2.0);
 		}
 
+		// Window resize
+		glfwGetFramebufferSize(window, (int*)&win_sz.x, (int*)&win_sz.y);
+		glViewport(0, 0, win_sz.x, win_sz.y);
+		aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 
-		// 3d
+		cam2D.view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -57.25f * cam2D_scale.y));
+		cam2D.proj = glm::perspective(glm::radians(1.0f), aspect_ratio, 0.01f, 4000.0f);
+
+		cam3D.view = glm::translate(cam3D.view, glm::vec3(
+			(glfwGetKey(window, GLFW_KEY_A) - glfwGetKey(window, GLFW_KEY_D)) * speed,
+			0.0f,
+			(glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S)) * speed
+		));
+		cam3D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
+
+
+		// 3D render
 		glEnable(GL_DEPTH_TEST);
 
 		glUseProgram(shader_program_pyramid);
@@ -278,7 +281,7 @@ int main() {
 		glDisable(GL_DEPTH_TEST);
 
 
-		// 2d
+		// 2D render
 		// Rainbow square
 		glUseProgram(shader_program_image);
 		cgui_shader_update_view(shader_program_image, &cam2D);
@@ -291,9 +294,10 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof indices, GL_UNSIGNED_INT, nullptr);
 
-		// Round rectangle
+		// Enable alpha
 		glEnable(GL_BLEND);
 
+		// Round rectangle
 		glUseProgram(shader_program_rdrect);
 		cgui_shader_update_view(shader_program_rdrect, &cam2D);
 		glBindVertexArray(VAO3);
