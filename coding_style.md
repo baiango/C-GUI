@@ -54,7 +54,8 @@ fn main() {
 ;
 ```
 ### Use comment to mark sections instead of turning into new functions.  
-Unless you are going to reuse it at least 10 times. Or if it is important.
+Unless you are going to reuse it at least 10 times. Or if it is important.  
+
 main.rs:
 ```
 let TxtTex { tex, strh } = TxtTex::new(txt.as_str(), sz as u16, ofst, col, NO_PATH, &ttf, &mktex);
@@ -64,13 +65,14 @@ sdl2_types.rs:
 pub const NO_PATH: &str = "NO_PATH";
 if NO_PATH == font_path { font_path = "pixel-clear-condensed.ttf"; }
 ```
-### Do not use `None` or `Option<T>` unless SDL2 require you to.
+### Do not use `None` or `Option<T>` unless `insert some libary here` require you to.
 Make constant global variable and use it to make it less vague or make the functions input types obvious.
 
 `if NO_PATH == font_path { font_path = "pixel-clear-condensed.ttf"; }`
 ### Constants are first class.
 Because constants are more important than variables. That is the first statement you read. And constants give you more informations than variables.  
 Use Reversed conditions or "Yoda conditions" if you found conditions with constants.  
+
 Using it:
 ```
 let TxtTex { tex: grass, strh } = TxtTex::new(
@@ -85,7 +87,7 @@ impl TxtTex<'_> {
 	pub fn new<'a>(
 		str: &'a str, size: u16, offset: Vec2u, color: Color, mut font_path: &'a str,
 		ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
-		) -> TxtTex<'a>	{}
+	) -> TxtTex<'a>	{}
   }
 ```
 ### Reorder the parameters to most important to least.
@@ -95,7 +97,7 @@ fn main() {
 	println!("Hello!\n");
   }
 ```
-### 2 spaces at the end of the function instead of 1 tab.
+### ~~2 spaces at the end of the function instead of 1 tab.~~
 ```
 fn main() {
 	println!("Hello!\n")
@@ -105,8 +107,8 @@ Or 1 semicolon and space if you have semicolon.
 ```
 impl TxtTex<'_> {
 	pub fn new<'a>(
-	str: &'a str, size: u16, offset: Vec2u, color: Color, font_path: &'a str,
-	ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
+		str: &'a str, size: u16, offset: Vec2u, color: Color, font_path: &'a str,
+		ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{
 		let px_font = ttf
 			.load_font(font_path, size).unwrap()
@@ -122,15 +124,15 @@ impl TxtTex<'_> {
 	;}
 
 	pub fn new_df_fnt<'a>(
-	str: &'a str, size: u16, offset: Vec2u, color: Color,
-	ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
+		str: &'a str, size: u16, offset: Vec2u, color: Color,
+		ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{
 		Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
 	 }
 
 	pub fn new_mid_df_fnt<'a>(
-	str: &'a str, size: u16, offset: Vec2u, color: Color,
-	ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
+		str: &'a str, size: u16, offset: Vec2u, color: Color,
+		ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{
 		let ret = Self::new(str, size, offset, color, "pixel-clear-condensed.ttf", ttf, mktex)
 	;	return TxtTex{ tex: ret.tex, strh: middle_rect(ret.strh) }
@@ -140,11 +142,12 @@ impl TxtTex<'_> {
 ### Do not use flag arguments or if/else to abstract away the functions
 "if/else" just makes your code harder to read because of unpredictability. And sometimes slower to run too!  
 **Flag Arguments are prohibited.**  
+Make another function to abstract it instead.
 ### Name the functions in this order.
 Verb -> Adjective -> Noun -> Data type  
 Do: `fn middle_rect()`  
 Not: `fn rect_middle()`  
-### Stick to Column database and Pure function only.
+### Stick to Column database and Pure function.
 **Pure function is...**
 - It does not modify global variables.
 - It always return same value with the same input.
@@ -156,6 +159,7 @@ Not: `fn rect_middle()`
 - You'll be running into memory bandwidth limit more easily with this. So please keep the data small.
 - It's perfect for physics engine. Since it calculate the object's transform 1000 times every frame.
 - It might be bad for readability. If it is, use pure function to write the functions instead.  
+If the readability is worth the performance cost.  
 
 Column database:
 ```
@@ -197,7 +201,9 @@ struct Texture<'a> { pixels_data: Vec<Color8> } // L2, it inherited Color8
 struct Vec2i { x: i32, y: i32 } // L1, no inherit except from STL
 struct Rect { x: i32, y: i32, w: i32, h: i32 } // L1, no inherit except from STL
 ```
-`Window` is a struct that is nested 2 deep. Do not go over 3 or the code will be hard to track down or read.  
+`Window` is a struct that is nested 2 deep because `TxtTex` and `IconTex` are nested 2 level deep.  
+Do not go over 3 or the code will be hard to track down or read.  
+
 **Example 2**
 ```
 struct Player { // Level 4
@@ -213,13 +219,14 @@ struct Node { index: Vec<u32> } // L1
 struct Vec3f { x: f32, y: f32, z: f32 } // L1
 impl Vec3f { fn new(x: f32, y: f32, z: f32) -> Vec3f { Vec3f{ x, y, z } } }
 ```
-At this point, try not to inherit the `Player` struct unless it's impossible. or do it if it's much easier to track the inherents. The `Player` is nested 3 level deep.
+The `Player` is nested 3 level deep because `Mesh` is nested 3 level deep.  
+At this point, try not to inherit the `Player` struct unless it's impossible. Or do it if it's much easier to track the inherents.
 
 # For C++
 ### Boost is banned from this project.  
 It's already really easy to write puzzling code with the STL. Let alone Boost, it has awfully nested deeply namespace. and the compiler don't even include Boost too! So you have to install it.  
 The Boost functions are too generic to be fast. It would be run much faster if you roll your own algorithms with the STL instead. Or writing codes in C style on C++.  
-Use C++20 STL only.
+Use functions from STL up to C++20 only.
 ### These C++ keywords are prohibited.
 Unless it's coming from STL or elsewhere. Don't use it.
 - [Templates](https://github.com/godotengine/godot-cpp/blob/3162be28e594bf5b17889117670fc6f2d75f2f0c/include/godot_cpp/templates/cowdata.hpp#L60) (Another code smell that hide Generics/Classes inside itself)
@@ -235,4 +242,37 @@ Unless it's coming from STL or elsewhere. Don't use it.
 - auto (Unless you casted the assigning value.)
 - Generics (It's an explicit version of function overloading.)
 ### Functions should keep it as long as possible, but still do one thing only.
-I don't want to abstracting functions that doesn't need to be abstracted.
+I don't want to abstracting functions that doesn't need to be abstracted.  
+When you abstracting the functions, you should be not taking away the control. Only take away the boilerplate.  
+
+### Use Builder pattern over JavaBean pattern.
+[In fact it's used in the first examples you see in Raylib Rust.](https://docs.rs/raylib/latest/raylib/#examples)
+```
+class Mesh pyramid;
+pyramid
+	.set_vertices(8, pyramid_vertices, sizeof pyramid_vertices)
+	.set_indices(pyramid_indices, sizeof pyramid_indices)
+	.cook_vertices()
+	.add_attribute(3) // Color
+	.add_attribute(2); // UV
+```
+Instead of JavaBean pattern:
+```
+class Mesh pyramid;
+pyramid.set_vertices(8, pyramid_vertices, sizeof pyramid_vertices)
+pyramid.set_indices(pyramid_indices, sizeof pyramid_indices)
+pyramid.cook_vertices()
+pyramid.add_attribute(3) // Color
+pyramid.add_attribute(2); // UV
+```
+Or Telescoping constructor pattern: (They are the worst pattern on earth.)
+```
+class Mesh pyramid;
+pyramid.new(
+	8, pyramid_vertices, sizeof pyramid_vertices,
+	pyramid_indices, sizeof pyramid_indices
+);
+pyramid.cook_vertices();
+pyramid.add_attribute(3) // Color
+pyramid.add_attribute(2); // UV
+```
