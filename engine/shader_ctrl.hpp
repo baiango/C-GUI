@@ -19,15 +19,19 @@ struct Perspective {
 
 void cgui_shader_update_view(GLuint shader_program, Perspective *camera);
 
-struct Mesh {
-	GLuint vao, vbo, ebo, shader_program;
-	GLfloat *vertices;
-	GLuint *indices;
-	uint32_t vertices_sizeof, indices_sizeof;
-	uint32_t row_vertices;
+class Mesh {
+public:
+	GLuint vao{}, vbo{}, ebo{}, shader_program{};
+	GLfloat *vertices = nullptr;
+	GLuint *indices = nullptr;
+	uint32_t vertices_sizeof = 0, indices_sizeof = 0;
+	uint32_t row_vertices = 0;
+	uint32_t index_vertex_attribute = 0;
+	uint32_t prefix_sum_vertex_attribute = 0;
 
 	Mesh &set_vertices(uint32_t row, GLfloat *vertices, uint32_t vertices_sizeof);
 	Mesh &set_indices(GLuint *indices, uint32_t indices_sizeof);
+	Mesh &add_attribute(GLint size);
 	Mesh &cook_vertices();
 };
 

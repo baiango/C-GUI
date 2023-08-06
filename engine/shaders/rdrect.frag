@@ -17,12 +17,17 @@ float compare(in float a, in float b, in float epsilon) {
 	return (a > b - epsilon && a < b + epsilon) ? 1.0f : 0.0f;
 }
 
+float map_range(in float value, in float a_min, in float a_max, in float b_min, in float b_max) {
+	return b_min + (b_max - b_min) * ((value - a_min) / (a_max - a_min));
+}
+
 void main() {
-	// I clamped the roundness because it works in this range only.
+	float roundness_max = min(canva_dimension.x, canva_dimension.y) / 2.0f;
+
 	float rd_clamped = clamp(
-		roundness,
+		map_range(roundness, 0.0f, 0.5f, 0.0f, roundness_max),
 		0.0f,
-		min(canva_dimension.x, canva_dimension.y) / 2.0f
+		roundness_max
 	);
 	vec2 canva_radius = canva_dimension / 2.0f;
 

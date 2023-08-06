@@ -10,7 +10,7 @@ string cgui_get_file_content(string file_name) {
 
 	if (!file) {
 		cout << "Missing '" << file_name << "'!";
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	string contents;
 	file.seekg(0, std::ios::end);
@@ -124,7 +124,28 @@ Mesh &Mesh::set_indices(GLuint *indices, uint32_t indices_sizeof) {
 	return *this;
 }
 
+Mesh &Mesh::add_attribute(GLint size) {
+	glEnableVertexAttribArray(this->index_vertex_attribute);
+	glVertexAttribPointer(
+		this->index_vertex_attribute, size, GL_FLOAT, GL_FALSE,
+		this->row_vertices * sizeof GLsizei,
+		(void *)(this->prefix_sum_vertex_attribute * sizeof GLfloat)
+	);
+	this->index_vertex_attribute++;
+	this->prefix_sum_vertex_attribute += size;
+	return *this;
+}
+
 Mesh &Mesh::cook_vertices() {
+	if (this->index_vertex_attribute) {
+		cout << "index_vertex_attribute is not 0!\n" <<
+			"Please use cook_vertices() first.\n";
+		exit(EXIT_FAILURE);
+	} else if (this->prefix_sum_vertex_attribute) {
+		cout << "prefix_sum_vertex_attribute is not 0!\n" <<
+			"Please use cook_vertices() first.\n";
+		exit(EXIT_FAILURE);
+	}
 	cgui_unbindAll();
 	glGenVertexArrays(1, &this->vao); // New VAO
 	glBindVertexArray(this->vao); // Bind VAO
@@ -134,6 +155,8 @@ Mesh &Mesh::cook_vertices() {
 	glBufferData(GL_ARRAY_BUFFER, this->vertices_sizeof, this->vertices, GL_STATIC_DRAW); // Add vertices
 	// Set range of the vertices to read
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, this->row_vertices * sizeof GLfloat, nullptr);
+	this->index_vertex_attribute++;
+	this->prefix_sum_vertex_attribute += 3;
 
 	glGenBuffers(1, &this->ebo); // New EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo); // Bind EBO

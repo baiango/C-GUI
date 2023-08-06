@@ -21,7 +21,7 @@ int32_t main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Init window
-	struct vec2u win_sz = {768, 768};
+	struct Vec2u win_sz = {768, 768};
 	GLFWwindow *window = glfwCreateWindow(win_sz.x, win_sz.y, "C++ OpenGL 3.3", nullptr, nullptr);
 	if (!window) {
 		cout << "Failed to create GLFW window\n";
@@ -41,11 +41,12 @@ int32_t main() {
 
 	// 3D
 	GLfloat pyramid_vertices[] = {
-		-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-		-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-		0.5f, 0.0f, -0.5f,      0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-		0.5f, 0.0f,  0.5f,      0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-		0.0f, 0.8f,  0.0f,      0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+		// Pos / Color / TexCoord //
+		-0.5f, 0.0f,  0.5f,   0.83f, 0.70f, 0.44f,   0.0f, 0.0f,
+		-0.5f, 0.0f, -0.5f,   0.83f, 0.70f, 0.44f,   5.0f, 0.0f,
+		0.5f, 0.0f, -0.5f,    0.83f, 0.70f, 0.44f,   0.0f, 0.0f,
+		0.5f, 0.0f,  0.5f,    0.83f, 0.70f, 0.44f,   5.0f, 0.0f,
+		0.0f, 0.8f,  0.0f,    0.92f, 0.86f, 0.76f,   2.5f, 5.0f
 	};
 
 	// Indices for vertices order
@@ -56,16 +57,13 @@ int32_t main() {
 	};
 
 	// VAO new
-	Mesh pyramid;
+	class Mesh pyramid;
 	pyramid
 		.set_vertices(8, pyramid_vertices, sizeof pyramid_vertices)
 		.set_indices(pyramid_indices, sizeof pyramid_indices)
-		.cook_vertices();
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void *)(3 * sizeof GLfloat));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void *)(6 * sizeof GLfloat));
+		.cook_vertices()
+		.add_attribute(3) // Color
+		.add_attribute(2); // UV
 
 	// Finalize
 	// Texture
@@ -79,7 +77,7 @@ int32_t main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	vec2i img_sz;
+	struct Vec2i img_sz;
 	int32_t img_col_ch;
 	stbi_set_flip_vertically_on_load(true);
 	uint8_t *brick_bytes = stbi_load("engine/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
@@ -96,18 +94,20 @@ int32_t main() {
 	glUniform1i(tex0, 0);
 
 	// Defer
-	ptr_pool.vao(pyramid.vao).vbo(pyramid.vbo).ebo(pyramid.ebo)
+	ptr_pool
+		.vao(pyramid.vao).vbo(pyramid.vbo).ebo(pyramid.ebo)
 		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
 	// 2D
 	GLfloat vertices[] = {
-		-0.5f,    -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.2f,  // Lower left corner
-		0.5f,     -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.2f,  // Lower right corner
-		0.0f,      0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 1.0f, 0.6f,  0.32f, // Upper corner
-		-0.5f / 2, 0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.46f, 0.17f, // Inner left
-		0.5f / 2,  0.5f * float(sqrt(3)) / 6,     0.0f, 0.9f, 0.46f, 0.17f, // Inner right
-		0.0f,     -0.5f * float(sqrt(3)) / 3,     0.0f, 0.8f, 0.3f,  0.02f  // Inner down
+		// Pos / Color //
+		-0.5f,    -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower left corner
+		0.5f,     -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower right corner
+		0.0f,      0.5f * float(sqrt(3)) * 2 / 3, 0.0f,   1.0f, 0.6f,  0.32f, // Upper corner
+		-0.5f / 2, 0.5f * float(sqrt(3)) / 6,     0.0f,   0.9f, 0.46f, 0.17f, // Inner left
+		0.5f / 2,  0.5f * float(sqrt(3)) / 6,     0.0f,   0.9f, 0.46f, 0.17f, // Inner right
+		0.0f,     -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.02f  // Inner down
 	};
 
 	GLuint indices[] = {
@@ -117,15 +117,12 @@ int32_t main() {
 	};
 
 	// VAO new
-	Mesh triangles;
+	class Mesh triangles;
 	triangles
 		.set_vertices(6, vertices, sizeof vertices)
 		.set_indices(indices, sizeof indices)
-		.cook_vertices();
-
-	// Define color slice
-	glEnableVertexAttribArray(1); // This will allow you to set color.
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, (void *)(3 * sizeof GLfloat));
+		.cook_vertices()
+		.add_attribute(3); // Color slice
 
 	// Finalize
 	GLuint shader_program = cgui_init_shaders("engine/shaders/shader.vert", "engine/shaders/shader.frag");
@@ -140,35 +137,33 @@ int32_t main() {
 
 	// Photo
 	GLfloat vertices2[] = {
-		-1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		-1.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f,  -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f,   0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+		// Pos / Color //
+		-1.0f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
+		-1.0f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,
+		0.0f,  -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,
+		0.0f,   0.5f, 0.0f,   1.0f, 0.0f, 1.0f,
 	};
 
 	GLuint indices2[] = {
-		0, 1, 2,
-		1, 2, 3
+		0, 1, 2, 1, 2, 3
 	};
 
-	struct Mesh rainbow;
-	rainbow
+	class Mesh rainbow_square;
+	rainbow_square
 		.set_vertices(6, vertices2, sizeof vertices2)
 		.set_indices(indices2, sizeof indices2)
-		.cook_vertices();
-
-	glEnableVertexAttribArray(1); // Unlock new vertex attribute
-	// Set color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, (void *)(3 * sizeof GLfloat));
+		.cook_vertices()
+		.add_attribute(3); // Color
 
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
 
 	ptr_pool
-		.vao(rainbow.vao).vbo(rainbow.vbo).ebo(rainbow.ebo)
+		.vao(rainbow_square.vao).vbo(rainbow_square.vbo).ebo(rainbow_square.ebo)
 		.sha_pgm(shader_program_image);
 
 	// Round rectangle
 	GLfloat vertices3[] = {
+		// Pos //
 		-0.5f, -0.3f, 0.0f,
 		-0.5f,  0.3f, 0.0f,
 		0.5f,  -0.3f, 0.0f,
@@ -176,11 +171,10 @@ int32_t main() {
 	};
 
 	GLuint indices3[] = {
-		0, 1, 2,
-		1, 2, 3
+		0, 1, 2, 1, 2, 3
 	};
 
-	Mesh rdrect;
+	class Mesh rdrect;
 	rdrect
 		.set_vertices(3, vertices3, sizeof vertices3)
 		.set_indices(indices3, sizeof indices3)
@@ -194,7 +188,7 @@ int32_t main() {
 	GLuint roundness = glGetUniformLocation(shader_program_rdrect, "aRoundness");
 	glUniform3f(aColor, 0.5f, 0.5f, 1.0f);
 	glUniform2f(canva_size, 1.0f, 0.6f);
-	glUniform1f(roundness, 0.5f);
+	glUniform1f(roundness, 0.4f);
 
 	ptr_pool
 		.vao(rdrect.vao).vbo(rdrect.vbo).ebo(rdrect.ebo)
@@ -211,7 +205,7 @@ int32_t main() {
 
 	// Camera
 	struct Perspective cam2D, cam3D;
-	struct vec2f32 cam2D_scale = {2.0f, 2.0f};
+	struct Vec2f cam2D_scale = {2.0f, 2.0f};
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 	double_t speed = 0.05;
 
@@ -230,7 +224,7 @@ int32_t main() {
 			GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
 		glfwSetInputMode(window, GLFW_CURSOR, cursor_state);
 
-		struct vec2i movement_input = {
+		struct Vec2i movement_input = {
 			glfwGetKey(window, GLFW_KEY_A) - glfwGetKey(window, GLFW_KEY_D),
 			glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S)
 		};
@@ -252,35 +246,22 @@ int32_t main() {
 		));
 		cam3D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
 
-
 		// 3D render
 		glEnable(GL_DEPTH_TEST);
-
-		// Pyramid
 		canva_renderer
 			.bind_texture(brick_tex)
 			.render(pyramid.vao, shader_program_pyramid, sizeof pyramid_indices, &cam3D);
-
-		// We don't need depth test for 2D, we only need the Z-order for 2D.
-		glDisable(GL_DEPTH_TEST);
-
+		glDisable(GL_DEPTH_TEST); // We don't need depth test for 2D, we only need the Z-order for 2D.
 
 		// 2D render
-		// Rainbow square
 		canva_renderer
-			.render(rainbow.vao, shader_program_image, sizeof indices2, &cam2D);
-
-		// Triangles
+			.render(rainbow_square.vao, shader_program_image, sizeof indices2, &cam2D);
 		canva_renderer
 			.render(triangles.vao, shader_program, sizeof indices, &cam2D);
 
-		// Enable alpha
 		glEnable(GL_BLEND);
-
-		// Round rectangle
 		canva_renderer
 			.render(rdrect.vao, shader_program_rdrect, sizeof indices3, &cam2D);
-
 		glDisable(GL_BLEND);
 
 		// End
