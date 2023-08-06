@@ -1,7 +1,6 @@
 ﻿#include "shader_ctrl.hpp"
 #include <iostream>
 using std::cout;
-#include <string>
 using std::string;
 #include <fstream>
 
@@ -71,7 +70,9 @@ GLuint cgui_init_shaders(string vertex_file, string fragment_file) {
 
 void cgui_prtGLError() {
 	GLenum err = glGetError();
-	if (GL_NO_ERROR != err) { cout << err << "\n"; }
+	if (GL_NO_ERROR != err) {
+		cout << err << "\n";
+	}
 }
 
 void cgui_unbindAll() {
@@ -84,11 +85,28 @@ void cgui_unbindAll() {
 }
 
 
-void cgui_shader_update_view(GLuint shader_program, perspective *camera) {
+void cgui_shader_update_view(GLuint shader_program, Perspective *camera) {
 	GLuint uni_model = glGetUniformLocation(shader_program, "model");
 	glUniformMatrix4fv(uni_model, 1, GL_FALSE, glm::value_ptr(camera->model));
 	GLuint uni_view = glGetUniformLocation(shader_program, "view");
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, glm::value_ptr(camera->view));
 	GLuint uni_proj = glGetUniformLocation(shader_program, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, glm::value_ptr(camera->proj));
+}
+
+
+CguiRender &CguiRender::bind_texture(GLuint texture) {
+	glBindTexture(GL_TEXTURE_2D, texture);
+	return *this;
+}
+
+CguiRender &CguiRender::render(
+	GLuint vao, GLuint shader_program,
+	GLsizei indices_size, Perspective *camera
+) {
+	glUseProgram(shader_program);
+	cgui_shader_update_view(shader_program, camera);
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, nullptr);
+	return *this;
 }

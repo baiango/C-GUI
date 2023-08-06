@@ -15,13 +15,15 @@ using std::vector;
 
 
 int32_t main() {
-	if (!glfwInit()) { cout << "GLFW init failed"; }
+	if (!glfwInit()) {
+		cout << "GLFW init failed";
+	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Init window
-	struct vec2u win_sz = { 768, 768 };
+	struct vec2u win_sz = {768, 768};
 	GLFWwindow *window = glfwCreateWindow(win_sz.x, win_sz.y, "C++ OpenGL 3.3", nullptr, nullptr);
 	if (!window) {
 		cout << "Failed to create GLFW window\n";
@@ -34,7 +36,7 @@ int32_t main() {
 	glViewport(0, 0, win_sz.x, win_sz.y);
 	// Make alpha available
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	PointerPoolGL ptr_pool;
+	class PointerPoolGL ptr_pool;
 
 	// 3D
 	GLfloat pyramid_vertices[] = {
@@ -68,9 +70,9 @@ int32_t main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof pyramid_indices, pyramid_indices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void*)(3 * sizeof GLfloat));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void *)(3 * sizeof GLfloat));
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void*)(6 * sizeof GLfloat));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void *)(6 * sizeof GLfloat));
 
 	// Finalize
 	// Texture
@@ -101,7 +103,8 @@ int32_t main() {
 	glUniform1i(tex0, 0);
 
 	// Defer
-	ptr_pool.vao(VAO4).vbo(VBO4).ebo(EBO4).sha_pgm(shader_program_pyramid)
+	ptr_pool.vao(VAO4).vbo(VBO4).ebo(EBO4)
+		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
 	// 2D
@@ -147,7 +150,7 @@ int32_t main() {
 
 	// Define color slice
 	glEnableVertexAttribArray(1); // This will allow you to set color.
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, (void*)(3 * sizeof GLfloat));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, (void *)(3 * sizeof GLfloat));
 
 	// Finalize
 	GLuint shader_program = cgui_init_shaders("engine/shaders/shader.vert", "engine/shaders/shader.frag");
@@ -156,7 +159,8 @@ int32_t main() {
 	glUniform1f(scale, 0.5f);
 
 	// Defer free
-	ptr_pool.vao(VAO).vbo(VBO).ebo(EBO).sha_pgm(shader_program);
+	ptr_pool.vao(VAO).vbo(VBO).ebo(EBO)
+		.sha_pgm(shader_program);
 
 	// Photo
 	GLfloat vertices2[] = {
@@ -186,11 +190,12 @@ int32_t main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices2, indices2, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, (void*)(3 * sizeof GLfloat));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, (void *)(3 * sizeof GLfloat));
 
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
 
-	ptr_pool.vao(VAO2).vbo(VBO2).ebo(EBO2).sha_pgm(shader_program_image);
+	ptr_pool.vao(VAO2).vbo(VBO2).ebo(EBO2)
+		.sha_pgm(shader_program_image);
 
 	// Round rectangle
 	GLfloat vertices3[] = {
@@ -229,11 +234,12 @@ int32_t main() {
 	glUniform1f(canva_size, 1.0f);
 	glUniform1f(roundness, 0.4f);
 
-	ptr_pool.vao(VAO3).vbo(VBO3).ebo(EBO3).sha_pgm(shader_program_rdrect);
+	ptr_pool.vao(VAO3).vbo(VBO3).ebo(EBO3)
+		.sha_pgm(shader_program_rdrect);
 
 	// GPU debug
-	const GLubyte *renderer = glGetString(GL_RENDERER);
-	cout << renderer << "\n";
+	const GLubyte *gpu_name = glGetString(GL_RENDERER);
+	cout << gpu_name << "\n";
 
 	// Init loop
 	GLfloat bg_col = cgui_col8_to_f32[0x20];
@@ -241,8 +247,9 @@ int32_t main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Normal
 
 	// Camera
-	struct perspective cam2D, cam3D;
-	struct vec2f32 cam2D_scale = { 2.0f, 2.0f };
+	class CguiRender canva_renderer;
+	struct Perspective cam2D, cam3D;
+	struct vec2f32 cam2D_scale = {2.0f, 2.0f};
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 	double_t speed = 0.05;
 
@@ -261,12 +268,17 @@ int32_t main() {
 			GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
 		glfwSetInputMode(window, GLFW_CURSOR, cursor_state);
 
+		struct vec2i movement_input = {
+			glfwGetKey(window, GLFW_KEY_A) - glfwGetKey(window, GLFW_KEY_D),
+			glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S)
+		};
+
 		if (GLFW_CURSOR_HIDDEN == cursor_state) {
 			glfwSetCursorPos(window, win_sz.x / 2.0, win_sz.y / 2.0);
 		}
 
 		// Window resize
-		glfwGetFramebufferSize(window, (int32_t*)&win_sz.x, (int32_t*)&win_sz.y);
+		glfwGetFramebufferSize(window, (int32_t *)&win_sz.x, (int32_t *)&win_sz.y);
 		glViewport(0, 0, win_sz.x, win_sz.y);
 		aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 
@@ -274,23 +286,18 @@ int32_t main() {
 		cam2D.proj = glm::perspective(glm::radians(1.0f), aspect_ratio, 0.01f, 4000.0f);
 
 		cam3D.view = glm::translate(cam3D.view, glm::vec3(
-			(glfwGetKey(window, GLFW_KEY_A) - glfwGetKey(window, GLFW_KEY_D)) * speed,
-			0.0f,
-			(glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S)) * speed
+			movement_input.x * speed, 0.0f, movement_input.y * speed
 		));
 		cam3D.proj = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.01f, 100.0f);
 
 
 		// 3D render
 		glEnable(GL_DEPTH_TEST);
-		// Rendering abstraction idea.
-		// pyramid.texture(brick_tex).render(VAO4, shader_program_pyramid, pyramid_indices, &cam3D)
-		// pyramid.texture().render(&cam3D)
-		glUseProgram(shader_program_pyramid);
-		cgui_shader_update_view(shader_program_pyramid, &cam3D);
-		glBindTexture(GL_TEXTURE_2D, brick_tex);
-		glBindVertexArray(VAO4);
-		glDrawElements(GL_TRIANGLES, sizeof pyramid_indices, GL_UNSIGNED_INT, nullptr);
+
+		// Pyramid
+		canva_renderer
+			.bind_texture(brick_tex)
+			.render(VAO4, shader_program_pyramid, sizeof pyramid_indices, &cam3D);
 
 		// We don't need depth test for 2D, we only need the Z-order for 2D.
 		glDisable(GL_DEPTH_TEST);
@@ -298,25 +305,19 @@ int32_t main() {
 
 		// 2D render
 		// Rainbow square
-		glUseProgram(shader_program_image);
-		cgui_shader_update_view(shader_program_image, &cam2D);
-		glBindVertexArray(VAO2);
-		glDrawElements(GL_TRIANGLES, sizeof indices2, GL_UNSIGNED_INT, nullptr);
+		canva_renderer
+			.render(VAO2, shader_program_image, sizeof indices2, &cam2D);
 
 		// Triangles
-		glUseProgram(shader_program);
-		cgui_shader_update_view(shader_program, &cam2D);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, sizeof indices, GL_UNSIGNED_INT, nullptr);
+		canva_renderer
+			.render(VAO, shader_program, sizeof indices, &cam2D);
 
 		// Enable alpha
 		glEnable(GL_BLEND);
 
 		// Round rectangle
-		glUseProgram(shader_program_rdrect);
-		cgui_shader_update_view(shader_program_rdrect, &cam2D);
-		glBindVertexArray(VAO3);
-		glDrawElements(GL_TRIANGLES, sizeof indices3, GL_UNSIGNED_INT, nullptr);
+		canva_renderer
+			.render(VAO3, shader_program_rdrect, sizeof indices3, &cam2D);
 
 		glDisable(GL_BLEND);
 

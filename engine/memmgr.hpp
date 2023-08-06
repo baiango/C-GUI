@@ -11,23 +11,23 @@ private:
 		shader_programs, textures;
 
 public:
-	PointerPoolGL& vao(GLuint vao) {
+	PointerPoolGL &vao(GLuint vao) {
 		VAOs.push_back(vao);
 		return *this;
 	}
-	PointerPoolGL& vbo(GLuint vbo) {
+	PointerPoolGL &vbo(GLuint vbo) {
 		VBOs.push_back(vbo);
 		return *this;
 	}
-	PointerPoolGL& ebo(GLuint ebo) {
+	PointerPoolGL &ebo(GLuint ebo) {
 		EBOs.push_back(ebo);
 		return *this;
 	}
-	PointerPoolGL& sha_pgm(GLuint shader_program) {
+	PointerPoolGL &sha_pgm(GLuint shader_program) {
 		shader_programs.push_back(shader_program);
 		return *this;
 	}
-	PointerPoolGL& texture(GLuint texture) {
+	PointerPoolGL &texture(GLuint texture) {
 		textures.push_back(texture);
 		return *this;
 	}

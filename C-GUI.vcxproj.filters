@@ -50,9 +50,6 @@
     <ClInclude Include="engine\types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\source\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="engine\memmgr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

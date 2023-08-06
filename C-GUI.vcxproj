@@ -166,7 +166,6 @@
     <ClInclude Include="engine\rgb.hpp" />
     <ClInclude Include="engine\shader_ctrl.hpp" />
     <ClInclude Include="engine\types.hpp" />
-    <ClInclude Include="external\source\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="engine\shaders\image.frag" />
