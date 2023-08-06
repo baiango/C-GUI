@@ -15,9 +15,7 @@ using std::vector;
 
 
 int32_t main() {
-	if (!glfwInit()) {
-		cout << "GLFW init failed";
-	}
+	if (!glfwInit()) { cout << "GLFW init failed."; }
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -36,7 +34,10 @@ int32_t main() {
 	glViewport(0, 0, win_sz.x, win_sz.y);
 	// Make alpha available
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// C-GUI
 	class PointerPoolGL ptr_pool;
+	class CguiRender canva_renderer;
 
 	// 3D
 	GLfloat pyramid_vertices[] = {
@@ -55,19 +56,11 @@ int32_t main() {
 	};
 
 	// VAO new
-	GLuint VAO4, VBO4, EBO4;
-	cgui_unbindAll();
-	glGenVertexArrays(1, &VAO4);
-	glBindVertexArray(VAO4);
-
-	glGenBuffers(1, &VBO4);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
-	glBufferData(GL_ARRAY_BUFFER, sizeof pyramid_vertices, pyramid_vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, nullptr);
-
-	glGenBuffers(1, &EBO4);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO4);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof pyramid_indices, pyramid_indices, GL_STATIC_DRAW);
+	Mesh pyramid;
+	pyramid
+		.set_vertices(8, pyramid_vertices, sizeof pyramid_vertices)
+		.set_indices(pyramid_indices, sizeof pyramid_indices)
+		.cook_vertices();
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof GLuint, (void *)(3 * sizeof GLfloat));
@@ -103,7 +96,7 @@ int32_t main() {
 	glUniform1i(tex0, 0);
 
 	// Defer
-	ptr_pool.vao(VAO4).vbo(VBO4).ebo(EBO4)
+	ptr_pool.vao(pyramid.vao).vbo(pyramid.vbo).ebo(pyramid.ebo)
 		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
@@ -124,29 +117,11 @@ int32_t main() {
 	};
 
 	// VAO new
-	cgui_unbindAll();
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	// VBO new
-	GLuint VBO;
-	glGenBuffers(1, &VBO); // New
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// Insert vertices into VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-
-	// VAO new part 2
-	// Define vertices slice
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLuint, nullptr);
-
-	// EBO new
-	GLuint EBO;
-	glGenBuffers(1, &EBO); // New
-	// EBO link to VAO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	// Insert indices into EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
+	Mesh triangles;
+	triangles
+		.set_vertices(6, vertices, sizeof vertices)
+		.set_indices(indices, sizeof indices)
+		.cook_vertices();
 
 	// Define color slice
 	glEnableVertexAttribArray(1); // This will allow you to set color.
@@ -159,7 +134,8 @@ int32_t main() {
 	glUniform1f(scale, 0.5f);
 
 	// Defer free
-	ptr_pool.vao(VAO).vbo(VBO).ebo(EBO)
+	ptr_pool
+		.vao(triangles.vao).vbo(triangles.vbo).ebo(triangles.ebo)
 		.sha_pgm(shader_program);
 
 	// Photo
@@ -175,26 +151,20 @@ int32_t main() {
 		1, 2, 3
 	};
 
-	GLuint VAO2, VBO2, EBO2;
-	cgui_unbindAll();
-	glGenVertexArrays(1, &VAO2);
-	glBindVertexArray(VAO2);
+	struct Mesh mesh2;
+	mesh2
+		.set_vertices(6, vertices2, sizeof vertices2)
+		.set_indices(indices2, sizeof indices2)
+		.cook_vertices();
 
-	glGenBuffers(1, &VBO2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices2, vertices2, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, nullptr);
-
-	glGenBuffers(1, &EBO2);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices2, indices2, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(1); // Unlock new vertex attribute
+	// Set color
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, (void *)(3 * sizeof GLfloat));
 
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
 
-	ptr_pool.vao(VAO2).vbo(VBO2).ebo(EBO2)
+	ptr_pool
+		.vao(mesh2.vao).vbo(mesh2.vbo).ebo(mesh2.ebo)
 		.sha_pgm(shader_program_image);
 
 	// Round rectangle
@@ -210,19 +180,11 @@ int32_t main() {
 		1, 2, 3
 	};
 
-	GLuint VAO3, VBO3, EBO3;
-	cgui_unbindAll();
-	glGenVertexArrays(1, &VAO3);
-	glBindVertexArray(VAO3);
-
-	glGenBuffers(1, &VBO3);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO3);
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices3, vertices3, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof GLfloat, nullptr);
-
-	glGenBuffers(1, &EBO3);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO3);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices3, indices3, GL_STATIC_DRAW);
+	Mesh rdrect;
+	rdrect
+		.set_vertices(3, vertices3, sizeof vertices3)
+		.set_indices(indices3, sizeof indices3)
+		.cook_vertices();
 
 	GLuint shader_program_rdrect = cgui_init_shaders("engine/shaders/rdrect.vert", "engine/shaders/rdrect.frag");
 	glUseProgram(shader_program_rdrect);
@@ -234,7 +196,8 @@ int32_t main() {
 	glUniform1f(canva_size, 1.0f);
 	glUniform1f(roundness, 0.4f);
 
-	ptr_pool.vao(VAO3).vbo(VBO3).ebo(EBO3)
+	ptr_pool
+		.vao(rdrect.vao).vbo(rdrect.vbo).ebo(rdrect.ebo)
 		.sha_pgm(shader_program_rdrect);
 
 	// GPU debug
@@ -247,7 +210,6 @@ int32_t main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Normal
 
 	// Camera
-	class CguiRender canva_renderer;
 	struct Perspective cam2D, cam3D;
 	struct vec2f32 cam2D_scale = {2.0f, 2.0f};
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
@@ -297,7 +259,7 @@ int32_t main() {
 		// Pyramid
 		canva_renderer
 			.bind_texture(brick_tex)
-			.render(VAO4, shader_program_pyramid, sizeof pyramid_indices, &cam3D);
+			.render(pyramid.vao, shader_program_pyramid, sizeof pyramid_indices, &cam3D);
 
 		// We don't need depth test for 2D, we only need the Z-order for 2D.
 		glDisable(GL_DEPTH_TEST);
@@ -306,18 +268,18 @@ int32_t main() {
 		// 2D render
 		// Rainbow square
 		canva_renderer
-			.render(VAO2, shader_program_image, sizeof indices2, &cam2D);
+			.render(mesh2.vao, shader_program_image, sizeof indices2, &cam2D);
 
 		// Triangles
 		canva_renderer
-			.render(VAO, shader_program, sizeof indices, &cam2D);
+			.render(triangles.vao, shader_program, sizeof indices, &cam2D);
 
 		// Enable alpha
 		glEnable(GL_BLEND);
 
 		// Round rectangle
 		canva_renderer
-			.render(VAO3, shader_program_rdrect, sizeof indices3, &cam2D);
+			.render(rdrect.vao, shader_program_rdrect, sizeof indices3, &cam2D);
 
 		glDisable(GL_BLEND);
 

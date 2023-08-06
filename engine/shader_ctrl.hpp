@@ -19,6 +19,18 @@ struct Perspective {
 
 void cgui_shader_update_view(GLuint shader_program, Perspective *camera);
 
+struct Mesh {
+	GLuint vao, vbo, ebo, shader_program;
+	GLfloat *vertices;
+	GLuint *indices;
+	uint32_t vertices_sizeof, indices_sizeof;
+	uint32_t row_vertices;
+
+	Mesh &set_vertices(uint32_t row, GLfloat *vertices, uint32_t vertices_sizeof);
+	Mesh &set_indices(GLuint *indices, uint32_t indices_sizeof);
+	Mesh &cook_vertices();
+};
+
 class CguiRender {
 public:
 	CguiRender &bind_texture(GLuint texture);

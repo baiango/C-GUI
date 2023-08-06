@@ -70,9 +70,7 @@ GLuint cgui_init_shaders(string vertex_file, string fragment_file) {
 
 void cgui_prtGLError() {
 	GLenum err = glGetError();
-	if (GL_NO_ERROR != err) {
-		cout << err << "\n";
-	}
+	if (GL_NO_ERROR != err) { cout << err << "\n"; }
 }
 
 void cgui_unbindAll() {
@@ -100,6 +98,7 @@ CguiRender &CguiRender::bind_texture(GLuint texture) {
 	return *this;
 }
 
+
 CguiRender &CguiRender::render(
 	GLuint vao, GLuint shader_program,
 	GLsizei indices_size, Perspective *camera
@@ -108,5 +107,38 @@ CguiRender &CguiRender::render(
 	cgui_shader_update_view(shader_program, camera);
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, nullptr);
+	return *this;
+}
+
+
+Mesh &Mesh::set_vertices(uint32_t row, GLfloat *vertices, uint32_t vertices_sizeof) {
+	this->row_vertices = row;
+	this->vertices = vertices;
+	this->vertices_sizeof = vertices_sizeof;
+	return *this;
+}
+
+Mesh &Mesh::set_indices(GLuint *indices, uint32_t indices_sizeof) {
+	this->indices = indices;
+	this->indices_sizeof = indices_sizeof;
+	return *this;
+}
+
+Mesh &Mesh::cook_vertices() {
+	cgui_unbindAll();
+	glGenVertexArrays(1, &this->vao); // New VAO
+	glBindVertexArray(this->vao); // Bind VAO
+
+	glGenBuffers(1, &this->vbo); // New VBO
+	glBindBuffer(GL_ARRAY_BUFFER, this->vbo); // Bind VBO
+	glBufferData(GL_ARRAY_BUFFER, this->vertices_sizeof, this->vertices, GL_STATIC_DRAW); // Add vertices
+	// Set range of the vertices to read
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, this->row_vertices * sizeof GLfloat, nullptr);
+
+	glGenBuffers(1, &this->ebo); // New EBO
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo); // Bind EBO
+	// Set range of the indices to read
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices_sizeof, this->indices, GL_STATIC_DRAW);
+
 	return *this;
 }
