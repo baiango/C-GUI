@@ -1,16 +1,15 @@
 #pragma once
-#include <cstdint>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 
-struct Vec2i { int32_t x, y; };
-struct Vec2u { uint32_t x, y; };
-struct Vec2f32 { float_t x, y; };
-struct Vec2f64 { double_t x, y; };
+struct vec2i { int32_t x, y; };
+struct vec2u { uint32_t x, y; };
+struct vec2f32 { float_t x, y; };
+struct vec2f64 { double_t x, y; };
 
-struct Vec3i { int32_t x, y, z; };
-struct Vec3u { uint32_t x, y, z; };
+struct vec3i { int32_t x, y, z; };
+struct vec3u { uint32_t x, y, z; };
 
 struct col8 { uint8_t r, g, b; };
 struct col8a { uint8_t r, g, b, a; };

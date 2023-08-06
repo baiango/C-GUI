@@ -11,16 +11,17 @@ using std::vector;
 #include "engine/shader_ctrl.hpp"
 #include "engine/rgb.hpp"
 #include "engine/types.hpp"
+#include "engine/memmgr.hpp"
 
 
-int main() {
+int32_t main() {
 	if (!glfwInit()) { cout << "GLFW init failed"; }
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Init window
-	const struct Vec2u win_sz = {768, 768};
+	struct vec2u win_sz = { 768, 768 };
 	GLFWwindow *window = glfwCreateWindow(win_sz.x, win_sz.y, "C++ OpenGL 3.3", nullptr, nullptr);
 	if (!window) {
 		cout << "Failed to create GLFW window\n";
@@ -33,6 +34,7 @@ int main() {
 	glViewport(0, 0, win_sz.x, win_sz.y);
 	// Make alpha available
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	PointerPoolGL ptr_pool;
 
 	// 3D
 	GLfloat pyramid_vertices[] = {
@@ -82,7 +84,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	Vec2i img_sz;
+	vec2i img_sz;
 	int32_t img_col_ch;
 	stbi_set_flip_vertically_on_load(true);
 	uint8_t *brick_bytes = stbi_load("engine/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
@@ -97,6 +99,10 @@ int main() {
 	glUseProgram(shader_program_pyramid);
 	GLuint tex0 = glGetUniformLocation(shader_program_pyramid, "tex0");
 	glUniform1i(tex0, 0);
+
+	// Defer
+	ptr_pool.vao(VAO4).vbo(VBO4).ebo(EBO4).sha_pgm(shader_program_pyramid)
+		.texture(brick_tex);
 
 	// 2D
 	GLfloat vertices[] = {
@@ -149,6 +155,9 @@ int main() {
 	glUseProgram(shader_program);
 	glUniform1f(scale, 0.5f);
 
+	// Defer free
+	ptr_pool.vao(VAO).vbo(VBO).ebo(EBO).sha_pgm(shader_program);
+
 	// Photo
 	GLfloat vertices2[] = {
 		-1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -180,6 +189,8 @@ int main() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof GLfloat, (void*)(3 * sizeof GLfloat));
 
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
+
+	ptr_pool.vao(VAO2).vbo(VBO2).ebo(EBO2).sha_pgm(shader_program_image);
 
 	// Round rectangle
 	GLfloat vertices3[] = {
@@ -218,6 +229,8 @@ int main() {
 	glUniform1f(canva_size, 1.0f);
 	glUniform1f(roundness, 0.4f);
 
+	ptr_pool.vao(VAO3).vbo(VBO3).ebo(EBO3).sha_pgm(shader_program_rdrect);
+
 	// GPU debug
 	const GLubyte *renderer = glGetString(GL_RENDERER);
 	cout << renderer << "\n";
@@ -229,7 +242,7 @@ int main() {
 
 	// Camera
 	struct perspective cam2D, cam3D;
-	struct Vec2f32 cam2D_scale = { 2.0f, 2.0f };
+	struct vec2f32 cam2D_scale = { 2.0f, 2.0f };
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 	double_t speed = 0.05;
 
@@ -243,7 +256,7 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		// Input
 		glfwPollEvents();
-		int cursor_state =
+		int32_t cursor_state =
 			GLFW_PRESS == glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) ?
 			GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
 		glfwSetInputMode(window, GLFW_CURSOR, cursor_state);
@@ -253,7 +266,7 @@ int main() {
 		}
 
 		// Window resize
-		glfwGetFramebufferSize(window, (int*)&win_sz.x, (int*)&win_sz.y);
+		glfwGetFramebufferSize(window, (int32_t*)&win_sz.x, (int32_t*)&win_sz.y);
 		glViewport(0, 0, win_sz.x, win_sz.y);
 		aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 
@@ -270,7 +283,9 @@ int main() {
 
 		// 3D render
 		glEnable(GL_DEPTH_TEST);
-
+		// Rendering abstraction idea.
+		// pyramid.texture(brick_tex).render(VAO4, shader_program_pyramid, pyramid_indices, &cam3D)
+		// pyramid.texture().render(&cam3D)
 		glUseProgram(shader_program_pyramid);
 		cgui_shader_update_view(shader_program_pyramid, &cam3D);
 		glBindTexture(GL_TEXTURE_2D, brick_tex);
@@ -312,27 +327,7 @@ int main() {
 	}
 
 	// Cleanup
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shader_program);
-
-	glDeleteVertexArrays(1, &VAO2);
-	glDeleteBuffers(1, &VBO2);
-	glDeleteBuffers(1, &EBO2);
-	glDeleteProgram(shader_program_image);
-
-	glDeleteVertexArrays(1, &VAO3);
-	glDeleteBuffers(1, &VBO3);
-	glDeleteBuffers(1, &EBO3);
-	glDeleteProgram(shader_program_rdrect);
-
-	glDeleteVertexArrays(1, &VAO4);
-	glDeleteBuffers(1, &VBO4);
-	glDeleteBuffers(1, &EBO4);
-	glDeleteProgram(shader_program_pyramid);
-	glDeleteTextures(1, &brick_tex);
-
+	ptr_pool.free();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }

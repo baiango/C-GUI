@@ -162,6 +162,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="engine\memmgr.hpp" />
     <ClInclude Include="engine\rgb.hpp" />
     <ClInclude Include="engine\shader_ctrl.hpp" />
     <ClInclude Include="engine\types.hpp" />
