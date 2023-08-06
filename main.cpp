@@ -151,8 +151,8 @@ int32_t main() {
 		1, 2, 3
 	};
 
-	struct Mesh mesh2;
-	mesh2
+	struct Mesh rainbow;
+	rainbow
 		.set_vertices(6, vertices2, sizeof vertices2)
 		.set_indices(indices2, sizeof indices2)
 		.cook_vertices();
@@ -164,15 +164,15 @@ int32_t main() {
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
 
 	ptr_pool
-		.vao(mesh2.vao).vbo(mesh2.vbo).ebo(mesh2.ebo)
+		.vao(rainbow.vao).vbo(rainbow.vbo).ebo(rainbow.ebo)
 		.sha_pgm(shader_program_image);
 
 	// Round rectangle
 	GLfloat vertices3[] = {
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		0.5f,  -0.5f, 0.0f,
-		0.5f,   0.5f, 0.0f
+		-0.5f, -0.3f, 0.0f,
+		-0.5f,  0.3f, 0.0f,
+		0.5f,  -0.3f, 0.0f,
+		0.5f,   0.3f, 0.0f
 	};
 
 	GLuint indices3[] = {
@@ -193,8 +193,8 @@ int32_t main() {
 	GLuint canva_size = glGetUniformLocation(shader_program_rdrect, "aCanvaDimension");
 	GLuint roundness = glGetUniformLocation(shader_program_rdrect, "aRoundness");
 	glUniform3f(aColor, 0.5f, 0.5f, 1.0f);
-	glUniform1f(canva_size, 1.0f);
-	glUniform1f(roundness, 0.4f);
+	glUniform2f(canva_size, 1.0f, 0.6f);
+	glUniform1f(roundness, 0.5f);
 
 	ptr_pool
 		.vao(rdrect.vao).vbo(rdrect.vbo).ebo(rdrect.ebo)
@@ -268,7 +268,7 @@ int32_t main() {
 		// 2D render
 		// Rainbow square
 		canva_renderer
-			.render(mesh2.vao, shader_program_image, sizeof indices2, &cam2D);
+			.render(rainbow.vao, shader_program_image, sizeof indices2, &cam2D);
 
 		// Triangles
 		canva_renderer

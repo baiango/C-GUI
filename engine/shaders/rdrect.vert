@@ -5,12 +5,12 @@ uniform mat4 proj;
 
 layout (location = 0) in vec3 aPos;
 uniform vec3 aColor;
-uniform float aCanvaDimension;
+uniform vec2 aCanvaDimension;
 uniform float aRoundness;
 
 out vec3 color;
 out vec3 pos;
-out float canva_dimension;
+out vec2 canva_dimension;
 out float roundness;
 
 
