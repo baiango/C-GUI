@@ -11,7 +11,7 @@
 ### ~~Place the semicolons at the scope to give a hint about the current indentions.~~  
 It does not help with readability since the code is not Rust and the C++ code are written in mostly C way.
 ### If the line statement is important, limit the line length below 75 characters.
-### Recommend to read it with 2 indentations. But up to ~~8~~ 32 are supported.
+### Recommend to read it with 2 indentations. But up to 32 are supported.
 ```
 fn main() {
 	let i = 3;
@@ -54,7 +54,7 @@ fn main() {
 ;
 ```
 ### Use comment to mark sections instead of turning into new functions.  
-Unless you are going to reuse it at least 10 times. Or if it is important.  
+Unless you are going to reuse it at least 3 times. Or if it is important.  
 
 main.rs:
 ```
@@ -85,25 +85,13 @@ let TxtTex { tex: grass, strh } = TxtTex::new(
 ```
 impl TxtTex<'_> {
 	pub fn new<'a>(
-		str: &'a str, size: u16, offset: Vec2u, color: Color, mut font_path: &'a str,
+		str: &'a str, size: u16, offset: Vec2u, color: Color, font_path: &'a str,
 		ttf: &'a Sdl2TtfContext, mktex: &'a TextureCreator<WindowContext>
 	) -> TxtTex<'a>	{}
   }
 ```
-### Reorder the parameters to most important to least.
-str -> size -> color -> font_path -> ttf -> mktex
-```
-fn main() {
-	println!("Hello!\n");
-  }
-```
-### ~~2 spaces at the end of the function instead of 1 tab.~~
-```
-fn main() {
-	println!("Hello!\n")
-; }
-```
-Or 1 semicolon and space if you have semicolon.
+### Reorder the arguments to most important to least.
+str -> size -> offset -> color -> font_path -> ttf -> mktex
 ```
 impl TxtTex<'_> {
 	pub fn new<'a>(
@@ -139,7 +127,7 @@ impl TxtTex<'_> {
 	;}
 }
 ```
-### Do not use flag arguments or if/else to abstract away the functions
+### Do not use flag arguments or if/else to abstract away the functions.
 "if/else" just makes your code harder to read because of unpredictability. And sometimes slower to run too!  
 **Flag Arguments are prohibited.**  
 Make another function to abstract it instead.
@@ -147,11 +135,13 @@ Make another function to abstract it instead.
 Verb -> Adjective -> Noun -> Data type  
 Do: `fn middle_rect()`  
 Not: `fn rect_middle()`  
+`middle` is an adjective. `rect` is a noun.  
 ### Stick to Column database and Pure function.
 **Pure function is...**
 - It does not modify global variables.
 - It always return same value with the same input.
-- It does not have any `mut` keyword used on the function.  
+- It does not have any `mut` keyword used on the function.
+- Prefer to not modify local variables. That is impure function.  
 
 **Column database is...**
 - Let's say our type is `Rect`.
@@ -232,7 +222,7 @@ Unless it's coming from STL or elsewhere. Don't use it.
 - [Templates](https://github.com/godotengine/godot-cpp/blob/3162be28e594bf5b17889117670fc6f2d75f2f0c/include/godot_cpp/templates/cowdata.hpp#L60) (Another code smell that hide Generics/Classes inside itself)
 - Inlines (They just reduce cache locality by filling the L1 cache and increasing the binary size.)
 - Function overloading (Most people can't tell when the functions are overloaded or not.)
-- typedef struct (For making it clear this is struct.)
+- typedef struct (You must prefix every struct/class declaration with struct/class keyword from this software. Except struct/class from the libraries)
 - typedef pointer (Use `int *` instead of `int_ptr`.)
 - Lambda (You can't even tell when the variables are values or functions with lambdas.)
 - Try-catch (It reduce predictability just like if/else.)
@@ -241,7 +231,12 @@ Unless it's coming from STL or elsewhere. Don't use it.
 - #if, #ifdef (Conditional statements are not preferred. Avoid them.)
 - auto (Unless you casted the assigning value.)
 - Generics (It's an explicit version of function overloading.)
+- Global variables (Global namespace are for constants, not variables. They are good as gotos. Pass the variables with struct or class instead.)
+- #include that get parent directory such as "#include ../scene0.hpp"  
+(It's vague and it doesn't tell the name of parent directory. The scope is really big too. So it's much easier to create header dependency hell with it.)
 ### Functions should keep it as long as possible, but still do one thing only.
+**Don't abstract functions that won't be used more than 2 times.**  
+
 I don't want to abstracting functions that doesn't need to be abstracted.  
 When you abstracting the functions, you should be not taking away the control. Only take away the boilerplate.  
 
@@ -265,7 +260,8 @@ pyramid.cook_vertices()
 pyramid.add_attribute(3) // Color
 pyramid.add_attribute(2); // UV
 ```
-Or Telescoping constructor pattern: (They are the worst pattern on earth.)
+Or Telescoping constructor pattern: (They are the worst pattern on earth.)  
+**Only use it when the arguments are less than 4, or functions that must use all the arguments you put in.**  
 ```
 class Mesh pyramid;
 pyramid.new(
