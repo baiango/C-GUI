@@ -30,7 +30,7 @@
     <ClCompile Include="engine\rgb.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="engine\shader_ctrl.cpp">
+    <ClCompile Include="engine\engine.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="external\source\glad.c">
@@ -44,7 +44,7 @@
     <ClInclude Include="engine\rgb.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\shader_ctrl.hpp">
+    <ClInclude Include="engine\engine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine\types.hpp">

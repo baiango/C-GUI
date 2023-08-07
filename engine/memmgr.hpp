@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 
 // Watch out for some GLuint pointer that has GLsizei more than 1.
 // Because the pool doesn't support removing it.
@@ -6,9 +8,9 @@
 // Because GLFW doesn't crash with dangling pointers.
 class PointerPoolGL {
 private:
-	vector<GLuint>
-		VAOs, VBOs, EBOs,
-		shader_programs, textures;
+	std::vector<GLuint>
+		VAOs{}, VBOs{}, EBOs{},
+		shader_programs{}, textures{};
 
 public:
 	PointerPoolGL &vao(GLuint vao) {
@@ -38,14 +40,11 @@ public:
 			glDeleteBuffers(1, &VBOs[i]);
 			glDeleteBuffers(1, &EBOs[i]);
 		}
-		VAOs, VBOs, EBOs = {};
 		for (size_t i = 0; i < shader_programs.size(); i++) {
 			glDeleteProgram(shader_programs[i]);
 		}
-		shader_programs = {};
 		for (size_t i = 0; i < textures.size(); i++) {
 			glDeleteTextures(1, &textures[i]);
 		}
-		textures = {};
 	}
 };
