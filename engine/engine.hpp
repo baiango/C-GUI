@@ -48,13 +48,13 @@ public:
 	GLuint vao{}, vbo{}, ebo{}, shader_program{};
 	GLfloat *vertices{};
 	GLuint *indices{};
-	uint32_t vertices_sizeof{}, indices_sizeof{};
+	uint32_t sizeof_vertices{}, sizeof_indices{};
 	uint32_t row_vertices{};
 	uint32_t index_vertex_attribute{};
 	uint32_t prefix_sum_vertex_attribute{};
 
-	Mesh &set_vertices(uint32_t row, GLfloat *vertices, uint32_t vertices_sizeof);
-	Mesh &set_indices(GLuint *indices, uint32_t indices_sizeof);
+	Mesh &set_vertices(uint32_t row, GLfloat *vertices, uint32_t sizeof_vertices);
+	Mesh &set_indices(GLuint *indices, uint32_t sizeof_indices);
 	Mesh &add_attribute(GLint size);
 	Mesh &cook_vertices();
 };

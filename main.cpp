@@ -11,6 +11,7 @@
 using std::cout;
 
 
+// This will become test unit "scene0".
 int32_t main() {
 	if (!glfwInit()) {
 		cout << "GLFW init failed.";
@@ -35,13 +36,12 @@ int32_t main() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// C-GUI
-	class PointerPoolGL ptr_pool;
+	class PointerPoolGL defer_ptr_pool;
 	class CguiRender canva_renderer;
 
 	// 3D
 	class Mesh pyramid;
-	{
-		GLfloat pyramid_vertices[] = {
+{		GLfloat pyramid_vertices[] = {
 			// Pos / Color / TexCoord //
 			-0.5f, 0.0f,  0.5f,   0.83f, 0.70f, 0.44f,   0.0f, 0.0f,
 			-0.5f, 0.0f, -0.5f,   0.83f, 0.70f, 0.44f,   5.0f, 0.0f,
@@ -68,8 +68,7 @@ int32_t main() {
 	// Finalize
 	// Texture
 	GLuint brick_tex;
-	{
-		glGenTextures(1, &brick_tex);
+{		glGenTextures(1, &brick_tex);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brick_tex);
 
@@ -95,15 +94,14 @@ int32_t main() {
 	glUniform1i(tex0, 0);
 
 	// Defer
-	ptr_pool
+	defer_ptr_pool
 		.vao(pyramid.vao).vbo(pyramid.vbo).ebo(pyramid.ebo)
 		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
 	// 2D
 	class Mesh triangles;
-	{
-		GLfloat vertices[] = {
+{		GLfloat vertices[] = {
 			// Pos / Color //
 			-0.5f,    -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower left corner
 			0.5f,     -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower right corner
@@ -133,14 +131,13 @@ int32_t main() {
 	glUniform1f(scale, 0.5f);
 
 	// Defer free
-	ptr_pool
+	defer_ptr_pool
 		.vao(triangles.vao).vbo(triangles.vbo).ebo(triangles.ebo)
 		.sha_pgm(shader_program);
 
 	// Photo
 	class Mesh rainbow_square;
-	{
-		GLfloat vertices2[] = {
+{		GLfloat vertices2[] = {
 			// Pos / Color //
 			-1.0f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
 			-1.0f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,
@@ -160,14 +157,13 @@ int32_t main() {
 	}
 	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
 
-	ptr_pool
+	defer_ptr_pool
 		.vao(rainbow_square.vao).vbo(rainbow_square.vbo).ebo(rainbow_square.ebo)
 		.sha_pgm(shader_program_image);
 
 	// Round rectangle
 	class Mesh rdrect;
-	{
-		GLfloat vertices3[] = {
+{		GLfloat vertices3[] = {
 			// Pos //
 			-0.5f, -0.3f, 0.0f,
 			-0.5f,  0.3f, 0.0f,
@@ -194,7 +190,7 @@ int32_t main() {
 	glUniform2f(canva_size, 1.0f, 0.6f);
 	glUniform1f(roundness, 0.4f);
 
-	ptr_pool
+	defer_ptr_pool
 		.vao(rdrect.vao).vbo(rdrect.vbo).ebo(rdrect.ebo)
 		.sha_pgm(shader_program_rdrect);
 
@@ -213,6 +209,7 @@ int32_t main() {
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 
 	cam3D.position = glm::vec3(0.0f, 0.0f, 1.5f);
+
 	cgui_prtGLError();
 	cgui_unbindAll();
 	while (!glfwWindowShouldClose(window)) {
@@ -253,18 +250,18 @@ int32_t main() {
 		glEnable(GL_DEPTH_TEST);
 		canva_renderer
 			.bind_texture(brick_tex)
-			.render3D(pyramid.vao, shader_program_pyramid, pyramid.indices_sizeof, &cam3D);
+			.render3D(pyramid.vao, shader_program_pyramid, pyramid.sizeof_indices, &cam3D);
 		glDisable(GL_DEPTH_TEST); // We don't need depth test for 2D, we only need the Z-order for 2D.
 
 		// 2D render
 		canva_renderer
-			.render(rainbow_square.vao, shader_program_image, rainbow_square.indices_sizeof, &cam2D);
+			.render(rainbow_square.vao, shader_program_image, rainbow_square.sizeof_indices, &cam2D);
 		canva_renderer
-			.render(triangles.vao, shader_program, triangles.indices_sizeof, &cam2D);
+			.render(triangles.vao, shader_program, triangles.sizeof_indices, &cam2D);
 		// With alpha
 		glEnable(GL_BLEND);
 		canva_renderer
-			.render(rdrect.vao, shader_program_rdrect, rdrect.indices_sizeof, &cam2D);
+			.render(rdrect.vao, shader_program_rdrect, rdrect.sizeof_indices, &cam2D);
 		glDisable(GL_BLEND);
 
 		// End
@@ -274,7 +271,7 @@ int32_t main() {
 	}
 
 	// Cleanup
-	ptr_pool.free();
+	defer_ptr_pool.free();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }

@@ -34,16 +34,16 @@ CguiRender &CguiRender::render3D(
 }
 
 
-Mesh &Mesh::set_vertices(uint32_t row, GLfloat *vertices, uint32_t vertices_sizeof) {
+Mesh &Mesh::set_vertices(uint32_t row, GLfloat *vertices, uint32_t sizeof_vertices) {
 	this->row_vertices = row;
 	this->vertices = vertices;
-	this->vertices_sizeof = vertices_sizeof;
+	this->sizeof_vertices = sizeof_vertices;
 	return *this;
 }
 
-Mesh &Mesh::set_indices(GLuint *indices, uint32_t indices_sizeof) {
+Mesh &Mesh::set_indices(GLuint *indices, uint32_t sizeof_indices) {
 	this->indices = indices;
-	this->indices_sizeof = indices_sizeof;
+	this->sizeof_indices = sizeof_indices;
 	return *this;
 }
 
@@ -75,7 +75,7 @@ Mesh &Mesh::cook_vertices() {
 
 	glGenBuffers(1, &this->vbo); // New VBO
 	glBindBuffer(GL_ARRAY_BUFFER, this->vbo); // Bind VBO
-	glBufferData(GL_ARRAY_BUFFER, this->vertices_sizeof, this->vertices, GL_STATIC_DRAW); // Add vertices
+	glBufferData(GL_ARRAY_BUFFER, this->sizeof_vertices, this->vertices, GL_STATIC_DRAW); // Add vertices
 	// Set range of the vertices to read
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, this->row_vertices * sizeof GLfloat, nullptr);
 	this->index_vertex_attribute++;
@@ -84,7 +84,7 @@ Mesh &Mesh::cook_vertices() {
 	glGenBuffers(1, &this->ebo); // New EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo); // Bind EBO
 	// Set range of the indices to read
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices_sizeof, this->indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->sizeof_indices, this->indices, GL_STATIC_DRAW);
 
 	return *this;
 }
