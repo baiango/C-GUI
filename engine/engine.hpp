@@ -3,14 +3,13 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
 #include "types.hpp"
 
 #include <string>
 #include <vector>
+#include <array>
 
 
 struct Cam2D {
@@ -74,6 +73,7 @@ public:
 	);
 };
 
+#include "cvector_impl.hpp"
 
 std::string cgui_get_file_content(std::string file_name);
 GLuint cgui_init_shaders(std::string vertex_file, std::string fragment_file);
@@ -81,4 +81,5 @@ void cgui_prtGLError();
 void cgui_unbindAll();
 void cgui_shader_update_view(GLuint shader_program, Cam2D *camera);
 void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera);
-void cgui_lsd_radix_sort(std::vector<int32_t> *start, std::vector<void *>comparator);
+template <typename T>
+void cgui_lsd_radix_sort(std::vector<T> *arr);

@@ -99,6 +99,9 @@ int32_t main() {
 		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
+	Cvector<int> aaa;
+	aaa.init(100);
+
 	// 2D
 	class Mesh triangles;
 {		GLfloat vertices[] = {

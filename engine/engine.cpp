@@ -3,6 +3,7 @@
 using std::cout;
 using std::string;
 using std::vector;
+using std::array;
 #include <fstream>
 
 
@@ -221,7 +222,73 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 	glUniformMatrix4fv(uni_cam_matrix, 1, GL_FALSE, glm::value_ptr(projection * view));
 }
 
+
 // This is for sorting the Z-order.
-void cgui_lsd_radix_sort(vector<int32_t> *start, vector<void *>comparator) {
-	// TODO me!!!!
+/*
+def radix_sort(arr):
+	current_digit = 1
+	# It stop when there's no more digits to sort
+	while max(arr) // current_digit > 0:
+		# Counting numbers in base 256
+		prefix_sum = [0] * 256
+		for n in arr:
+			prefix_sum[n // current_digit & 255] += 1
+
+		# Building the prefix sum list
+		for i in range(1, 256):
+			prefix_sum[i] += prefix_sum[i - 1]
+
+		# Add the elements back to sort it
+		swap = [0] * len(arr)
+		for n in reversed(arr):
+			prefix_sum[n // current_digit & 255] -= 1
+			swap[prefix_sum[n // current_digit & 255]] = n
+
+		# Swapping the array with the swap
+		for i, n in enumerate(swap):
+			arr[i] = n
+
+		# Moving the algorithm to the next base 256 digit
+		current_digit <<= 8
+
+import time
+
+arr = [170, 45, 75, 90, 802, 24, 2, 66]
+#arr = list(reversed(range(1_000_000)))
+
+start_time = time.time()
+radix_sort(arr)
+print("--- %s seconds ---" % (time.time() - start_time))
+
+if arr != [2, 24, 45, 66, 75, 90, 170, 802]: print("Error!")
+print("Sorted array:", arr[-5:])
+*/
+template <typename T>
+void cgui_lsd_radix_sort(vector<T> *arr) {
+	int current_digit = 1;
+	auto arr_max = *std::max_element(arr->begin(), arr->end());
+	// It stop when there's no more digits to sort
+	while (arr_max / current_digit > 0) {
+		array<uint64_t, 256> prefix_sum;
+		// Counting numbers in base 256
+		for (T &n : *arr) {
+			prefix_sum[n / current_digit & 255]++;
+		}
+		// Building the prefix sum list
+		for (size_t i = 1; i < 256; i++) {
+			prefix_sum[i] += prefix_sum[i - 1];
+		}
+		// Add the elements back to sort it
+		vector<T> swap(arr->size(), 0);
+		for (auto iter = arr->rbegin(); iter != arr->rend(); iter++) {
+			prefix_sum[*iter / current_digit & 255] -= 1;
+			swap[prefix_sum[*iter / current_digit & 255]] = *iter;
+		}
+		// Swapping the array with the swap
+		for (size_t i = 0; i < arr->size(); i++) {
+			(*arr)[i] = swap[i];
+		}
+		// Moving the algorithm to the next base 256 digit
+		current_digit <<= 8;
+	}
 }

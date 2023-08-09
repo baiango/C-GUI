@@ -219,7 +219,6 @@ The Boost functions are too generic to be fast. It would be run much faster if y
 Use functions from STL up to C++20 only.
 ### These C++ keywords are prohibited.
 Unless it's coming from STL or elsewhere. Don't use it.
-- [Templates](https://github.com/godotengine/godot-cpp/blob/3162be28e594bf5b17889117670fc6f2d75f2f0c/include/godot_cpp/templates/cowdata.hpp#L60) (Another code smell that hide Generics/Classes inside itself)
 - Inlines (They just reduce cache locality by filling the L1 cache and increasing the binary size.)
 - Function overloading (Most people can't tell when the functions are overloaded or not.)
 - typedef struct (You must prefix every struct/class declaration with struct/class keyword from this software. Except struct/class from the libraries)
@@ -234,6 +233,7 @@ Unless it's coming from STL or elsewhere. Don't use it.
 - Global variables (Global namespace are for constants, not variables. They are good as gotos. Pass the variables with struct or class instead.)
 - #include that get parent directory such as "#include ../scene0.hpp"  
 (It's vague and it doesn't tell the name of parent directory. The scope is really big too. So it's much easier to create header dependency hell with it.)
+- [Templates](https://github.com/godotengine/godot-cpp/blob/3162be28e594bf5b17889117670fc6f2d75f2f0c/include/godot_cpp/templates/cowdata.hpp#L60) (Another code smell that hide Generics/Classes inside itself. Use it on containers only.)
 ### Functions should keep it as long as possible, but still do one thing only.
 **Don't abstract functions that won't be used more than 2 times.**  
 
