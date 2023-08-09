@@ -1,11 +1,12 @@
 ﻿#pragma once
+#include "cvector_impl.hpp"
+#include "types.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/vector_angle.hpp>
-
-#include "types.hpp"
 
 #include <string>
 #include <vector>
@@ -73,7 +74,6 @@ public:
 	);
 };
 
-#include "cvector_impl.hpp"
 
 std::string cgui_get_file_content(std::string file_name);
 GLuint cgui_init_shaders(std::string vertex_file, std::string fragment_file);

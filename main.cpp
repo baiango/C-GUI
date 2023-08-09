@@ -41,7 +41,8 @@ int32_t main() {
 
 	// 3D
 	class Mesh pyramid;
-{		GLfloat pyramid_vertices[] = {
+	{
+		GLfloat pyramid_vertices[] = {
 			// Pos / Color / TexCoord //
 			-0.5f, 0.0f,  0.5f,   0.83f, 0.70f, 0.44f,   0.0f, 0.0f,
 			-0.5f, 0.0f, -0.5f,   0.83f, 0.70f, 0.44f,   5.0f, 0.0f,
@@ -68,7 +69,8 @@ int32_t main() {
 	// Finalize
 	// Texture
 	GLuint brick_tex;
-{		glGenTextures(1, &brick_tex);
+	{
+		glGenTextures(1, &brick_tex);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brick_tex);
 
@@ -104,7 +106,8 @@ int32_t main() {
 
 	// 2D
 	class Mesh triangles;
-{		GLfloat vertices[] = {
+	{
+		GLfloat vertices[] = {
 			// Pos / Color //
 			-0.5f,    -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower left corner
 			0.5f,     -0.5f * float(sqrt(3)) / 3,     0.0f,   0.8f, 0.3f,  0.2f,  // Lower right corner
@@ -140,7 +143,8 @@ int32_t main() {
 
 	// Photo
 	class Mesh rainbow_square;
-{		GLfloat vertices2[] = {
+	{
+		GLfloat vertices2[] = {
 			// Pos / Color //
 			-1.0f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
 			-1.0f,  0.5f, 0.0f,   0.0f, 1.0f, 0.0f,
@@ -166,7 +170,8 @@ int32_t main() {
 
 	// Round rectangle
 	class Mesh rdrect;
-{		GLfloat vertices3[] = {
+	{
+		GLfloat vertices3[] = {
 			// Pos //
 			-0.5f, -0.3f, 0.0f,
 			-0.5f,  0.3f, 0.0f,
