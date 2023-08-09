@@ -227,29 +227,39 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 // It only support unsigned.
 template <typename T>
 void cgui_lsd_radix_sort(vector<T> *arr) {
-	int current_digit = 1;
 	size_t max_value = *std::max_element(arr->begin(), arr->end());
-	// It stop when there's no more digits to sort
+	uint64_t current_digit = 1;
+	// 1 << 21 is 4 MiB memory usage.
+	size_t base = std::min(1llu << 21, (size_t)pow(2, ceil(log2(max_value))));
+
+	// It stop when there's no more digits to sort.
+	T *prefix_sum = new T[base]{};
 	while (max_value / current_digit >= 1) {
-		array<uint64_t, 256> prefix_sum{};
-		// Counting numbers in base 256
-		for (T &n : *arr) {
-			prefix_sum[n / current_digit & 255]++;
+		// Set to 0.
+		for (size_t i{}; ++i < base;) {
+			prefix_sum[i] ^= prefix_sum[i];
 		}
-		// Building the prefix sum list
-		for (size_t i = 1; i < 256; i++) {
+		// Counting numbers in base 2**22.
+		for (T &n : *arr) {
+			prefix_sum[n / current_digit & base - 1]++;
+		}
+		// Building the prefix sum list.
+		for (size_t i = 1; i < base; i++) {
 			prefix_sum[i] += prefix_sum[i - 1];
 		}
-		// Add the elements back to sort it
+		// Add the elements back to sort it.
 		vector<T> swap(arr->size(), 0);
 		for (auto iter = arr->rbegin(); ++iter != arr->rend();) {
-			swap[--prefix_sum[*iter / current_digit & 255]] = *iter;
+			swap[--prefix_sum[*iter / current_digit & base - 1]] = *iter;
 		}
-		// Swapping the array with the swap
+		// Swapping the array with the swap.
 		for (size_t i = 0; i < arr->size(); i++) {
 			(*arr)[i] = swap[i];
 		}
-		// Moving the algorithm to the next base 256 digit
-		current_digit <<= 8;
+		// Moving the algorithm to the next base digit.
+		// Because 64 / 3 = 21.3333. (sizeof uint64_t / 3)
+		// Making the base bigger will run on smaller array faster.
+		current_digit *= base;
 	}
+	delete[] prefix_sum;
 }

@@ -12,6 +12,8 @@
 // But not as safe as std::vector.
 // So use std::vector to save your time.
 // Only use it if you are sure that it won't go out of bound.
+// Or std::vector is slow things down too much.
+// It's rarely caused by std::vector.
 template <typename T>
 class Cvector {
 private:

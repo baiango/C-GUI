@@ -1,4 +1,4 @@
-def radix_sort(arr):
+def lsd_radix_sort(arr):
 	current_digit = 1
 	# It stop when there's no more digits to sort
 	while max(arr) // current_digit > 0:
@@ -24,13 +24,20 @@ def radix_sort(arr):
 		# Moving the algorithm to the next base 256 digit
 		current_digit <<= 8
 
+
+from math import log2
+def refined_interpolation_insertion_sort(arr):
+	quit_interpolation = log2(log2(len(arr)))
+
+
 import time
 
 arr = [170, 45, 75, 90, 802, 24, 2, 66]
 arr = list(reversed(range(1_000_000)))
 
 start_time = time.time()
-radix_sort(arr)
+lsd_radix_sort(arr)
+# refined_interpolation_insertion_sort(arr)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 if arr != [2, 24, 45, 66, 75, 90, 170, 802]: print("Error!")
