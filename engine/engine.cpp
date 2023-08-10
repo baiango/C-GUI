@@ -236,11 +236,20 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 
 	// Skip it when OOM.
 	T *prefix_sum = new T[max_value + 1]{};
-	if (!prefix_sum) { goto fn_quit_prefix_sum; }
+	if (!prefix_sum) {
+		cout << "cgui_lsd_radix_sort: prefix_sum: Out of memory! Skipping...\n";
+	}
 	T *swap = new T[arr->size()]{};
-	if (!swap) { goto fn_quit_swap; }
+	if (!swap) {
+		delete[] prefix_sum;
+		cout << "cgui_lsd_radix_sort: swap: Out of memory! Skipping...\n";
+	}
 	T *ret = new T[arr->size()]{};
-	if (!ret) { goto fn_quit_ret; }
+	if (!ret) {
+		delete[] prefix_sum;
+		delete[] swap;
+		cout << "cgui_lsd_radix_sort: ret: Out of memory! Skipping...\n";
+	}
 	// Copy arr to ret.
 	for (size_t i = 0; i < arr->size(); i++) {
 		ret[i] = (*arr)[i];
@@ -280,13 +289,6 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	}
 	delete[] ret;
 	return;
-	// OOM protection
-fn_quit_ret:
-	delete[] swap;
-fn_quit_swap:
-	delete[] prefix_sum;
-fn_quit_prefix_sum:
-	cout << "cgui_lsd_radix_sort: Out of memory! Skipping...\n";
 }
 
 void cgui_sort(vector<T> *arr) {}
