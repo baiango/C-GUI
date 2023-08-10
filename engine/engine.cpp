@@ -239,7 +239,7 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	T *ret = new T[arr->size()]{};
 	while (max_value / current_digit >= 1) {
 		// Set to 0.
-		for (size_t i = 0; i < max_value; i++) {
+		for (size_t i = 0; i < max_value + 1; i++) {
 			prefix_sum[i] ^= prefix_sum[i];
 		}
 		// Counting numbers in base.
@@ -247,7 +247,7 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 			prefix_sum[n / current_digit & base - 1]++;
 		}
 		// Building the prefix sum list.
-		for (size_t i = 1; i < max_value; i++) {
+		for (size_t i = 1; i < max_value + 1; i++) {
 			prefix_sum[i] += prefix_sum[i - 1];
 		}
 		// Add the elements back to sort it.
