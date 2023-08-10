@@ -229,32 +229,15 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value>::type
 cgui_lsd_radix_sort(vector<T> *arr) {
-	if (!arr->size()) { return; }
+	if (!arr->size() || 1 == arr->size()) { return; }
+
 	size_t max_value = *std::max_element(arr->begin(), arr->end());
 	uint64_t current_digit = 1;
 	// 1 << 21 is 4 MiB memory usage.
-	size_t base = std::min(1llu << 21, (size_t)pow(2, ceil(log2(max_value))));
+	T base = std::min((T)1 << 21, (T)pow(2, ceil(log2(max_value))));
 
-	// Skip it when OOM.
 	T *prefix_sum = new T[max_value + 1]{};
-	if (!prefix_sum) {
-		cout << "cgui_lsd_radix_sort: prefix_sum: Out of memory! Skipping...\n";
-	}
 	T *swap = new T[arr->size()]{};
-	if (!swap) {
-		delete[] prefix_sum;
-		cout << "cgui_lsd_radix_sort: swap: Out of memory! Skipping...\n";
-	}
-	T *ret = new T[arr->size()]{};
-	if (!ret) {
-		delete[] prefix_sum;
-		delete[] swap;
-		cout << "cgui_lsd_radix_sort: ret: Out of memory! Skipping...\n";
-	}
-	// Copy arr to ret.
-	for (size_t i = 0; i < arr->size(); i++) {
-		ret[i] = (*arr)[i];
-	}
 	// It stop when there's no more digits to sort.
 	while (max_value / current_digit >= 1) {
 		// Set to 0.
@@ -271,11 +254,11 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 		}
 		// Add the elements back to sort it.
 		for (size_t i = arr->size() - 1; i > 0; i--) {
-			swap[--prefix_sum[ret[i] / current_digit & base - 1]] = ret[i];
+			swap[--prefix_sum[(*arr)[i] / current_digit & base - 1]] = (*arr)[i];
 		}
 		// Swapping the array with the swap.
 		for (size_t i = 0; i < arr->size(); i++) {
-			ret[i] = swap[i];
+			(*arr)[i] = swap[i];
 		}
 		// Moving the algorithm to the next base digit.
 		// Because 64 / 3 = 21.3333. (sizeof uint64_t / 3)
@@ -285,11 +268,8 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	}
 	delete[] prefix_sum;
 	delete[] swap;
-	for (size_t i = 0; i < arr->size(); i++) {
-		(*arr)[i] = ret[i];
-	}
-	delete[] ret;
-	return;
 }
 
-void cgui_sort(vector<T> *arr) {}
+//void refined_interpolation_insertion_sort(vector<T> *arr) {}
+
+//void cgui_sort(vector<T> *arr) {}

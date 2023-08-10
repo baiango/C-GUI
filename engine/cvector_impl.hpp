@@ -10,10 +10,13 @@
 
 // Fast as C! But safer and with comes with autofree!
 // But not as safe as std::vector.
-// So use std::vector to save your time.
+// It's extremely hard to debug "new" since you can't see what's inside the "new" vector in the debugger.
+// Please use std::vector instead and save your time.
+// Or combine with std::vector to make it much easier to debug.
 // Only use it if you are sure that it won't go out of bound.
-// Or std::vector is slow things down too much.
-// It's rarely caused by std::vector.
+// It's really easy to get "write access violation" crashes with it.
+// std::vector won't slow things down too much.
+// Performance issue is rarely caused by std::vector.
 template <typename T>
 class Cvector {
 private:
