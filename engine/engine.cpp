@@ -229,6 +229,7 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value>::type
 cgui_lsd_radix_sort(vector<T> *arr) {
+	if (!arr->size()) { return; }
 	size_t max_value = *std::max_element(arr->begin(), arr->end());
 	uint64_t current_digit = 1;
 	// 1 << 21 is 4 MiB memory usage.
