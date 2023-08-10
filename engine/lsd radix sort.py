@@ -32,8 +32,9 @@ def refined_interpolation_insertion_sort(arr):
 
 import time
 
-arr = [170, 45, 75, 90, 802, 24, 2, 66]
-arr = list(reversed(range(1_000_000)))
+# arr = [170, 45, 75, 90, 802, 24, 2, 66]
+# arr = list(reversed(range(1_000_000)))
+arr = list(reversed(range(10)))
 
 start_time = time.time()
 lsd_radix_sort(arr)
@@ -41,4 +42,5 @@ lsd_radix_sort(arr)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 if arr != [2, 24, 45, 66, 75, 90, 170, 802]: print("Error!")
-print("Sorted array:", arr[-5:])
+# print("Sorted array:", arr[-5:])
+print("Sorted array:", arr)
