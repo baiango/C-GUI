@@ -225,6 +225,7 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 
 // This is for sorting the Z-order.
 // It only support unsigned.
+// It's slower than std::sort in release mode. Don't use this.
 template <typename T>
 typename std::enable_if<std::is_unsigned<T>::value>::type
 cgui_lsd_radix_sort(vector<T> *arr) {
@@ -233,10 +234,18 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	// 1 << 21 is 4 MiB memory usage.
 	size_t base = std::min(1llu << 21, (size_t)pow(2, ceil(log2(max_value))));
 
-	// It stop when there's no more digits to sort.
+	// Skip it when OOM.
 	T *prefix_sum = new T[max_value + 1]{};
+	if (!prefix_sum) { goto fn_quit_prefix_sum; }
 	T *swap = new T[arr->size()]{};
+	if (!swap) { goto fn_quit_swap; }
 	T *ret = new T[arr->size()]{};
+	if (!ret) { goto fn_quit_ret; }
+	// Copy arr to ret.
+	for (size_t i = 0; i < arr->size(); i++) {
+		ret[i] = (*arr)[i];
+	}
+	// It stop when there's no more digits to sort.
 	while (max_value / current_digit >= 1) {
 		// Set to 0.
 		for (size_t i = 0; i < max_value + 1; i++) {
@@ -251,8 +260,8 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 			prefix_sum[i] += prefix_sum[i - 1];
 		}
 		// Add the elements back to sort it.
-		for (auto iter = arr->rbegin(); iter != arr->rend(); iter++) {
-			swap[--prefix_sum[*iter / current_digit & base - 1]] = *iter;
+		for (size_t i = arr->size() - 1; i > 0; i--) {
+			swap[--prefix_sum[ret[i] / current_digit & base - 1]] = ret[i];
 		}
 		// Swapping the array with the swap.
 		for (size_t i = 0; i < arr->size(); i++) {
@@ -260,6 +269,7 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 		}
 		// Moving the algorithm to the next base digit.
 		// Because 64 / 3 = 21.3333. (sizeof uint64_t / 3)
+		// Why do it in 4(16) runs when you can do in 3(22) on uint64_t.
 		// Making the base bigger will run on smaller array faster.
 		current_digit *= base;
 	}
@@ -269,6 +279,14 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 		(*arr)[i] = ret[i];
 	}
 	delete[] ret;
+	return;
+	// OOM protection
+fn_quit_ret:
+	delete[] swap;
+fn_quit_swap:
+	delete[] prefix_sum;
+fn_quit_prefix_sum:
+	cout << "cgui_lsd_radix_sort: Out of memory! Skipping...\n";
 }
 
 void cgui_sort(vector<T> *arr) {}
