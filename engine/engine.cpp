@@ -226,7 +226,8 @@ void cgui_shader_update_view3D(GLuint shader_program, Cam3D *camera) {
 // This is for sorting the Z-order.
 // It only support unsigned.
 template <typename T>
-void cgui_lsd_radix_sort(vector<T> *arr) {
+typename std::enable_if<std::is_unsigned<T>::value>::type
+cgui_lsd_radix_sort(vector<T> *arr) {
 	size_t max_value = *std::max_element(arr->begin(), arr->end());
 	uint64_t current_digit = 1;
 	// 1 << 21 is 4 MiB memory usage.
@@ -235,6 +236,7 @@ void cgui_lsd_radix_sort(vector<T> *arr) {
 	// It stop when there's no more digits to sort.
 	T *prefix_sum = new T[max_value + 1]{};
 	T *swap = new T[arr->size()]{};
+	T *ret = new T[arr->size()]{};
 	while (max_value / current_digit >= 1) {
 		// Set to 0.
 		for (size_t i = 0; i < max_value; i++) {
@@ -254,7 +256,7 @@ void cgui_lsd_radix_sort(vector<T> *arr) {
 		}
 		// Swapping the array with the swap.
 		for (size_t i = 0; i < arr->size(); i++) {
-			(*arr)[i] = swap[i];
+			ret[i] = swap[i];
 		}
 		// Moving the algorithm to the next base digit.
 		// Because 64 / 3 = 21.3333. (sizeof uint64_t / 3)
@@ -263,4 +265,10 @@ void cgui_lsd_radix_sort(vector<T> *arr) {
 	}
 	delete[] prefix_sum;
 	delete[] swap;
+	for (size_t i = 0; i < arr->size(); i++) {
+		(*arr)[i] = ret[i];
+	}
+	delete[] ret;
 }
+
+void cgui_sort(vector<T> *arr) {}
