@@ -221,10 +221,13 @@ Use functions from STL up to C++20 only.
 Unless it's coming from STL or elsewhere. Don't use it.
 - Inlines (They just reduce cache locality by filling the L1 cache and increasing the binary size.)
 - Function overloading (Most people can't tell when the functions are overloaded or not.)
-- typedef struct (You must prefix every struct/class declaration with struct/class keyword from this software. Except struct/class from the libraries)
+- typedef struct (You must prefix every struct/class declaration with struct/class keyword from this software. Except struct/class from the libraries)  
+**If struct have methods(functions), call it class instead.**
 - typedef pointer (Use `int *` instead of `int_ptr`.)
 - Lambda (You can't even tell when the variables are values or functions with lambdas.)
 - Try-catch (It reduce predictability just like if/else.)
+- Throw exceptions (You never knew which code will [handle](https://250bpm.com/blog:4/) the exception or not. When you can just call the function to handle it. So the program will terminate if you don't handle the exception.)
+- Constructors (It don't have return type and it force you to use exceptions. Use init function to initialize the classes instead.)
 ### Avoid these C++ keywords.
 - #define (Use constants instead for type safety.)
 - #if, #ifdef (Conditional statements are not preferred. Avoid them.)
@@ -261,7 +264,7 @@ pyramid.add_attribute(3) // Color
 pyramid.add_attribute(2); // UV
 ```
 Or Telescoping constructor pattern: (They are the worst pattern on earth.)  
-**Only use it when the arguments are less than 4, or functions that must use all the arguments you put in.**  
+**Only use it when the arguments can fit in 2 or less lines, or functions that must use all the arguments you put in.**  
 ```
 class Mesh pyramid;
 pyramid.new(
