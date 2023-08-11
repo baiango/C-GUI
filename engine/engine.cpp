@@ -237,9 +237,9 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	uint64_t base = std::min(1llu << 21, (uint64_t)pow(2, ceil(log2(max_value))));
 
 	T *prefix_sum = new T[max_value + 1]{};
-	T *swap = new T[arr->size()]{};
+	T *swap = new T[arr->size()];
 	// It stop when there's no more digits to sort.
-	while (max_value / current_digit >= 1) {
+	while (max_value / current_digit > 0) {
 		// Set to 0.
 		for (size_t i = 0; i < max_value + 1; i++) {
 			prefix_sum[i] ^= prefix_sum[i];
@@ -254,7 +254,8 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 		}
 		// Add the elements back to sort it.
 		for (size_t i = arr->size() - 1; i > 0; i--) {
-			swap[--prefix_sum[(*arr)[i] / current_digit & base - 1]] = (*arr)[i];
+			size_t index = --prefix_sum[(*arr)[i] / current_digit & base - 1];
+			swap[index] = (*arr)[i];
 		}
 		// Swapping the array with the swap.
 		for (size_t i = 0; i < arr->size(); i++) {
