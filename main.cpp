@@ -101,7 +101,7 @@ int32_t main() {
 		.sha_pgm(shader_program_pyramid)
 		.texture(brick_tex);
 
-	Cvector<int> aaa;
+	class Cvector<int> aaa;
 	aaa.init(100);
 
 	// 2D
@@ -212,8 +212,8 @@ int32_t main() {
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Normal
 
 	// Camera
-	struct Cam2D cam2D;
-	struct Cam3D cam3D;
+	class Cam2D cam2D;
+	class Cam3D cam3D;
 	float_t aspect_ratio = (float_t)win_sz.x / (float_t)win_sz.y;
 
 	cam3D.position = glm::vec3(0.0f, 0.0f, 1.5f);

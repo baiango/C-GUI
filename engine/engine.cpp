@@ -7,12 +7,12 @@ using std::array;
 #include <fstream>
 
 
-CguiRender &CguiRender::bind_texture(GLuint texture) {
+class CguiRender &CguiRender::bind_texture(GLuint texture) {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	return *this;
 }
 
-CguiRender &CguiRender::render(
+class CguiRender &CguiRender::render(
 	GLuint vao, GLuint shader_program,
 	GLsizei indices_size, Cam2D *camera
 ) {
@@ -23,7 +23,7 @@ CguiRender &CguiRender::render(
 	return *this;
 }
 
-CguiRender &CguiRender::render3D(
+class CguiRender &CguiRender::render3D(
 	GLuint vao, GLuint shader_program,
 	GLsizei indices_size, Cam3D *camera
 ) {
@@ -35,20 +35,20 @@ CguiRender &CguiRender::render3D(
 }
 
 
-Mesh &Mesh::set_vertices(uint32_t row, GLfloat *vertices, uint32_t sizeof_vertices) {
+class Mesh &Mesh::set_vertices(uint32_t row, GLfloat *vertices, uint32_t sizeof_vertices) {
 	this->row_vertices = row;
 	this->vertices = vertices;
 	this->sizeof_vertices = sizeof_vertices;
 	return *this;
 }
 
-Mesh &Mesh::set_indices(GLuint *indices, uint32_t sizeof_indices) {
+class Mesh &Mesh::set_indices(GLuint *indices, uint32_t sizeof_indices) {
 	this->indices = indices;
 	this->sizeof_indices = sizeof_indices;
 	return *this;
 }
 
-Mesh &Mesh::add_attribute(GLint size) {
+class Mesh &Mesh::add_attribute(GLint size) {
 	glEnableVertexAttribArray(this->index_vertex_attribute);
 	glVertexAttribPointer(
 		this->index_vertex_attribute, size, GL_FLOAT, GL_FALSE,
@@ -60,7 +60,7 @@ Mesh &Mesh::add_attribute(GLint size) {
 	return *this;
 }
 
-Mesh &Mesh::cook_vertices() {
+class Mesh &Mesh::cook_vertices() {
 	if (this->index_vertex_attribute) {
 		cout << "index_vertex_attribute is not 0!\n" <<
 			"Please use cook_vertices() first.\n";
@@ -92,14 +92,14 @@ Mesh &Mesh::cook_vertices() {
 
 
 // Work in progress
-Cam2D &Cam2D::process() {
+class Cam2D &Cam2D::process() {
 	this->view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, this->one_meter_size * this->scale.y));
 	this->proj = glm::perspective(glm::radians(1.0f), this->aspect_ratio, 0.01f, 4000.0f);
 	return *this;
 }
 
 
-Cam3D &Cam3D::process(
+class Cam3D &Cam3D::process(
 		int32_t cursor_state, Vec3i movement_input, Vec2f64 mouse_pos,
 		Vec2u window_size, GLFWwindow *window
 ) {
@@ -271,6 +271,15 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	delete[] swap;
 }
 
-//void refined_interpolation_insertion_sort(vector<T> *arr) {}
+// TODO!!!!
+//void refined_lerp_insertion_sort(vector<T> *arr) {}
 
-//void cgui_sort(vector<T> *arr) {}
+//template <typename T>
+//void cgui_sort(vector<T> *arr) {
+//	union Sort {
+//		int8_t i8; int16_t i16; int32_t i32; int64_t i64;
+//		float_t f32; double_t f32;
+//	};
+//	Sort data{};
+//	cgui_lsd_radix_sort(data);
+//}

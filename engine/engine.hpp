@@ -13,7 +13,8 @@
 #include <array>
 
 
-struct Cam2D {
+class Cam2D {
+public:
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 proj = glm::mat4(1.0f);
@@ -25,7 +26,8 @@ struct Cam2D {
 	Cam2D &process();
 };
 
-struct Cam3D {
+class Cam3D {
+public:
 	glm::vec3 position{};
 	glm::vec3 rotation = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
