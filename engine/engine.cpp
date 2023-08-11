@@ -234,7 +234,7 @@ cgui_lsd_radix_sort(vector<T> *arr) {
 	size_t max_value = *std::max_element(arr->begin(), arr->end());
 	uint64_t current_digit = 1;
 	// 1 << 21 is 4 MiB memory usage.
-	T base = std::min((T)1 << 21, (T)pow(2, ceil(log2(max_value))));
+	T base = std::min(1llu << 21, (uint64_t)pow(2, ceil(log2(max_value))));
 
 	T *prefix_sum = new T[max_value + 1]{};
 	T *swap = new T[arr->size()]{};
