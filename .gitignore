@@ -3,8 +3,7 @@
 .vs
 x64
 r***mi*
-Shaders
-Images
 *.inspxeproj
 *.dflginspxe
 *.infoinspxe
+GPUCache

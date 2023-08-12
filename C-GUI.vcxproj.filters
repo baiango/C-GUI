@@ -27,10 +27,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\rgb.cpp">
+    <ClCompile Include="cgui\rgb.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="engine\engine.cpp">
+    <ClCompile Include="cgui\engine.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="external\source\glad.c">
@@ -41,50 +41,50 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="engine\rgb.hpp">
+    <ClInclude Include="cgui\rgb.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\engine.hpp">
+    <ClInclude Include="cgui\engine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\types.hpp">
+    <ClInclude Include="cgui\types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\memmgr.hpp">
+    <ClInclude Include="cgui\memmgr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="engine\cvector_impl.hpp">
+    <ClInclude Include="cgui\cvector_impl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="engine\shaders\image.frag">
+    <None Include="cgui\shaders\image.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\image.vert">
+    <None Include="cgui\shaders\image.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\rdrect.frag">
+    <None Include="cgui\shaders\rdrect.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\rdrect.vert">
+    <None Include="cgui\shaders\rdrect.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\shader.frag">
+    <None Include="cgui\shaders\shader.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\shader.vert">
+    <None Include="cgui\shaders\shader.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\pyramid.frag">
+    <None Include="cgui\shaders\pyramid.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
-    <None Include="engine\shaders\pyramid.vert">
+    <None Include="cgui\shaders\pyramid.vert">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="engine\image\brick.png">
+    <Image Include="cgui\image\brick.png">
       <Filter>Source Files\engine</Filter>
     </Image>
   </ItemGroup>

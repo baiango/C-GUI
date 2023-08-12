@@ -2,10 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <stb/stb_image.h>
 
-#include "engine/engine.hpp"
-#include "engine/rgb.hpp"
-#include "engine/types.hpp"
-#include "engine/memmgr.hpp"
+#include "cgui/engine.hpp"
+#include "cgui/rgb.hpp"
+#include "cgui/types.hpp"
+#include "cgui/memmgr.hpp"
 
 #include <iostream>
 using std::cout;
@@ -82,7 +82,7 @@ int32_t main() {
 		struct Vec2i img_sz {};
 		int32_t img_col_ch;
 		stbi_set_flip_vertically_on_load(true);
-		uint8_t *brick_bytes = stbi_load("engine/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
+		uint8_t *brick_bytes = stbi_load("cgui/image/brick.png", &img_sz.x, &img_sz.y, &img_col_ch, 0);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_sz.x, img_sz.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, brick_bytes);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -90,7 +90,7 @@ int32_t main() {
 		stbi_image_free(brick_bytes);
 	}
 	// Shader program
-	GLuint shader_program_pyramid = cgui_init_shaders("engine/shaders/pyramid.vert", "engine/shaders/pyramid.frag");
+	GLuint shader_program_pyramid = cgui_init_shaders("cgui/shaders/pyramid.vert", "cgui/shaders/pyramid.frag");
 	glUseProgram(shader_program_pyramid);
 	GLuint tex0 = glGetUniformLocation(shader_program_pyramid, "tex0");
 	glUniform1i(tex0, 0);
@@ -131,7 +131,7 @@ int32_t main() {
 			.add_attribute(3); // Color slice
 	}
 	// Finalize
-	GLuint shader_program = cgui_init_shaders("engine/shaders/shader.vert", "engine/shaders/shader.frag");
+	GLuint shader_program = cgui_init_shaders("cgui/shaders/shader.vert", "cgui/shaders/shader.frag");
 	GLuint scale = glGetUniformLocation(shader_program, "scale");
 	glUseProgram(shader_program);
 	glUniform1f(scale, 0.5f);
@@ -162,7 +162,7 @@ int32_t main() {
 			.cook_vertices()
 			.add_attribute(3); // Color
 	}
-	GLuint shader_program_image = cgui_init_shaders("engine/shaders/image.vert", "engine/shaders/image.frag");
+	GLuint shader_program_image = cgui_init_shaders("cgui/shaders/image.vert", "cgui/shaders/image.frag");
 
 	defer_ptr_pool
 		.vao(rainbow_square.vao).vbo(rainbow_square.vbo).ebo(rainbow_square.ebo)
@@ -188,7 +188,7 @@ int32_t main() {
 			.set_indices(indices3, sizeof indices3)
 			.cook_vertices();
 	}
-	GLuint shader_program_rdrect = cgui_init_shaders("engine/shaders/rdrect.vert", "engine/shaders/rdrect.frag");
+	GLuint shader_program_rdrect = cgui_init_shaders("cgui/shaders/rdrect.vert", "cgui/shaders/rdrect.frag");
 	glUseProgram(shader_program_rdrect);
 
 	GLuint aColor = glGetUniformLocation(shader_program_rdrect, "aColor");

@@ -19,7 +19,7 @@ public:
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 proj = glm::mat4(1.0f);
 
-	struct Vec2f scale = {2.0f, 2.0f}; // In range of -0.5f..0.5f
+	struct Vec2f scale = {1.0f, 1.0f};
 	float_t one_meter_size = -57.25f;
 	float_t aspect_ratio{};
 

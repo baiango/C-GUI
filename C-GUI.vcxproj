@@ -155,31 +155,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="engine\rgb.cpp" />
-    <ClCompile Include="engine\engine.cpp" />
+    <ClCompile Include="cgui\rgb.cpp" />
+    <ClCompile Include="cgui\engine.cpp" />
     <ClCompile Include="external\source\glad.c" />
     <ClCompile Include="external\source\stb_image.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="engine\cvector_impl.hpp" />
-    <ClInclude Include="engine\memmgr.hpp" />
-    <ClInclude Include="engine\rgb.hpp" />
-    <ClInclude Include="engine\engine.hpp" />
-    <ClInclude Include="engine\types.hpp" />
+    <ClInclude Include="cgui\cvector_impl.hpp" />
+    <ClInclude Include="cgui\memmgr.hpp" />
+    <ClInclude Include="cgui\rgb.hpp" />
+    <ClInclude Include="cgui\engine.hpp" />
+    <ClInclude Include="cgui\types.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="engine\shaders\image.frag" />
-    <None Include="engine\shaders\image.vert" />
-    <None Include="engine\shaders\pyramid.frag" />
-    <None Include="engine\shaders\pyramid.vert" />
-    <None Include="engine\shaders\rdrect.frag" />
-    <None Include="engine\shaders\rdrect.vert" />
-    <None Include="engine\shaders\shader.frag" />
-    <None Include="engine\shaders\shader.vert" />
+    <None Include="cgui\shaders\image.frag" />
+    <None Include="cgui\shaders\image.vert" />
+    <None Include="cgui\shaders\pyramid.frag" />
+    <None Include="cgui\shaders\pyramid.vert" />
+    <None Include="cgui\shaders\rdrect.frag" />
+    <None Include="cgui\shaders\rdrect.vert" />
+    <None Include="cgui\shaders\shader.frag" />
+    <None Include="cgui\shaders\shader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="engine\image\brick.png" />
+    <Image Include="cgui\image\brick.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
