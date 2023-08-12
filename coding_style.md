@@ -10,7 +10,7 @@
 ```
 ### ~~Place the semicolons at the scope to give a hint about the current indentions.~~  
 It does not help with readability since the code is not Rust and the C++ code are written in mostly C way.
-### If the line statement is important, limit the line length below 75 characters.
+### If the line statement is important, limit the line length below 70 characters.
 ### Recommend to read it with 2 indentations. But up to 32 are supported.
 ```
 fn main() {

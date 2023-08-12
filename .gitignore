@@ -1,9 +1,8 @@
 *.exe
 *.pdb
-.vs
-x64
 r***mi*
 *.inspxeproj
 *.dflginspxe
 *.infoinspxe
-GPUCache
+nppBackup
+*.orig
