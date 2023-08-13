@@ -31,6 +31,9 @@ int32_t main()
 	glViewport(0, 0, win_sz.x, win_sz.y);
 	// Make alpha available
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Check the program is running with iGPU or dGPU.
+	const GLubyte* gpu_name = glGetString(GL_RENDERER);
+	printf("%s\n", gpu_name);
 
 	// 2D
 	struct Mesh rdrect;
@@ -47,32 +50,42 @@ int32_t main()
 
 	cgui_cook_vertices(&rdrect);
 
-	float model[] =
+	struct mat4 model =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, -2.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
-	float view[] =
+	struct mat4 view =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
-	float proj[] =
+	struct mat4 proj =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
 
-	char* file_content = cgui_read_file();
-
-	printf("File content:\n%s", file_content);
+	GLuint shad_pgm_rdrect = cgui_init_shaders(
+	        "src/shaders/rdrect.vert",
+	        "src/shaders/rdrect.frag"
+	    );
+	cgui_set_uniform3f("aColor", 0.5f, 0.5f, 1.0f, shad_pgm_rdrect);
+	cgui_set_uniform2f("canva_size", 1.0f, 0.6f, shad_pgm_rdrect);
+	cgui_set_uniform1f("roundness", 0.4f, shad_pgm_rdrect);
 
 	// Don't use black. It's good for hiding bugs under it.
 	GLfloat bg_col = 0x20 / 256.0f;
 
 	while (!glfwWindowShouldClose(window))
-	{	glfwPollEvents();
+	{	// Input
+		glfwPollEvents();
+		// 2D render
+		glUseProgram(shad_pgm_rdrect);
+		glBindVertexArray(rdrect.vao);
 
+		glDrawElements(GL_TRIANGLES, rdrect.sizeof_indices, GL_UNSIGNED_INT, NULL);
+		// End
 		glfwSwapBuffers(window);
 		glClearColor(bg_col, bg_col, bg_col, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); } }

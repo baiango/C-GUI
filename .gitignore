@@ -8,3 +8,4 @@ nppBackup
 *.orig
 *.o
 ctui/check-cppcheck-build-dir
+*.plist
