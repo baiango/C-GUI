@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+
 struct Vec2i { int32_t x, y; };
 struct Vec2u { uint32_t x, y; };
 struct Vec2f { float x, y; };
