@@ -7,3 +7,4 @@ r***mi*
 nppBackup
 *.orig
 *.o
+ctui/check-cppcheck-build-dir

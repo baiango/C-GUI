@@ -4,7 +4,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <tcclib.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 int32_t main()
 {	printf("Hello!\n");
@@ -40,8 +42,8 @@ int32_t main()
 		GLuint indices[] = {0, 1, 2, 1, 2, 3 };
 		rdrect.vertices = vertices;
 		rdrect.indices = indices;
-		rdrect.sizeof_vertices = sizeof vertices;
-		rdrect.sizeof_indices = sizeof indices; }
+		rdrect.sizeof_vertices = sizeof(vertices);
+		rdrect.sizeof_indices = sizeof(indices); }
 
 	cgui_cook_vertices(&rdrect);
 
@@ -61,18 +63,10 @@ int32_t main()
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
 
-	FILE *fptr;
-	fptr = fopen("src/shaders/rdrect.vert", "r"); 
-	char vert_str[256];
-	if (NULL != fptr) {
-		while (fgets(vert_str, 256, fptr)) {
-			printf("%s", fptr);
-			fclose(fptr);
-		}
-	} else {
-		printf("Not able to open the file.\n");
-	}
-	
+	char* file_content = cgui_read_file();
+
+	printf("File content:\n%s", file_content);
+
 	// Don't use black. It's good for hiding bugs under it.
 	GLfloat bg_col = 0x20 / 256.0f;
 
@@ -81,5 +75,4 @@ int32_t main()
 
 		glfwSwapBuffers(window);
 		glClearColor(bg_col, bg_col, bg_col, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-} }
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); } }
