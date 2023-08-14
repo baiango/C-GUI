@@ -19,7 +19,7 @@ int32_t main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	struct Vec2u win_sz = {768, 768 };
+	struct Vec2u win_sz = { 768, 768 };
 	GLFWwindow* window = glfwCreateWindow(win_sz.x, win_sz.y, "C OpenGL 3.3", NULL, NULL);
 
 	if (!window)
@@ -50,17 +50,18 @@ int32_t main()
 
 	cgui_cook_vertices(&rdrect);
 
-	struct mat4 model =
+	// No need for a struct, they are really hard to printf.
+	float model[16] =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, -2.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
-	struct mat4 view =
+	float view[16] =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f };
-	struct mat4 proj =
+	float proj[16] =
 	{	1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
@@ -76,6 +77,11 @@ int32_t main()
 
 	// Don't use black. It's good for hiding bugs under it.
 	GLfloat bg_col = 0x20 / 256.0f;
+
+	for (size_t i = 0; i < 16; i++)
+	{	printf("%f\n", model[i]); }
+
+	cgui_prtGLError();
 
 	while (!glfwWindowShouldClose(window))
 	{	// Input

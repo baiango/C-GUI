@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec3 color;
-in vec3 pos;
+in vec3 shape;
 in vec2 canva_dimension;
 in float roundness; // 0.0f..0.5f
 
@@ -31,18 +31,18 @@ void main() {
 	);
 	vec2 canva_radius = canva_dimension / 2.0f;
 
-	float left = pos.x + canva_radius.x - rd_clamped;
-	float right = pos.x - canva_radius.x + rd_clamped;
-	float top = pos.y - canva_radius.y + rd_clamped;
-	float bottom = pos.y + canva_radius.y - rd_clamped;
+	float left = shape.x + canva_radius.x - rd_clamped;
+	float right = shape.x - canva_radius.x + rd_clamped;
+	float top = shape.y - canva_radius.y + rd_clamped;
+	float bottom = shape.y + canva_radius.y - rd_clamped;
 
 	float canva;
 	canva += circle(left, top, rd_clamped);
 	canva += circle(left, bottom, rd_clamped);
 	canva += circle(right, top, rd_clamped);
 	canva += circle(right, bottom, rd_clamped);
-	canva += compare(pos.x, 0.0f, canva_radius.x - rd_clamped);
-	canva += compare(pos.y, 0.0f, canva_radius.y - rd_clamped);
+	canva += compare(shape.x, 0.0f, canva_radius.x - rd_clamped);
+	canva += compare(shape.y, 0.0f, canva_radius.y - rd_clamped);
 
 	FragColor = vec4(color, 1.0f * canva);
 }
