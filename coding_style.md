@@ -276,7 +276,57 @@ pyramid.add_attribute(3) // Color
 pyramid.add_attribute(2); // UV
 ```
 # C
-### Don't hand unrolling the loop
+### Don't use inline
+A function call overhead is better than a DRAM read.  
+You only had 32 KiB of data cache and instruction cache in L1 to play around, and that's not much. So don't waste it.
+
+### Prefer procedural than pure functions
+Pure functions in C can lead overengineered structs, buggy, and inconsistent code.  
+And it force you to use malloc.
+It's hard to return the arrays in C without debugging for hours.  
+Another plus for not returning anything is, you can cut down a few lines of code.  
+So I invented a style called ASM. Because it looks like ASM codes. You use the first argument as the return value. And the other arguments can do anything else.  
+```
+void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
+{	for (size_t i = 0; i < 4; i++)
+	{	for (size_t j = 0; j < 4; j++)
+		{	mat->data[4 * j + i] = 0.0f;
+
+			for (size_t k = 0; k < 4; k++)
+			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
+```
+`mat` is used to store the result of `a` and `b` multiplication. It's still feels like pure functions. But way more efficient and slightly less safe.  
+This style will help you keep the variables on the stack, less debugging, and stopping you keep switching pure functions to procedural.
+
+### Avoid heap allocations
+Heap doesn't autofree. So don't use it for small or fixed size variables.  
+### Don't optimization unless it's the bottleneck
+1.	Don't use loop fusion on big data.
+2.	Don't use loop strength reduction. But variables strength reduction is fine.
+3.	Don't use loop unswitching.
+4.	Do remove compiler padding.  
+[Example:](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,selection:(endColumn:22,endLineNumber:18,positionColumn:22,positionLineNumber:18,selectionStartColumn:22,selectionStartLineNumber:18,startColumn:22,startLineNumber:18),source:'%23include+%3Cstdbool.h%3E%0A%23include+%3Cstdio.h%3E%0A%0Astruct+AAA+%7B%0A++++bool+b%3B+//+1+byte%0A++++int+i%3B+//+4+bytes%0A++++short+s%3B+//+2+byte%0A%7D%3B+//+AAA+is+sizeof(int)+*+3%0Astruct+BBB+%7B%0A++++int+i%3B+//+4+bytes%0A++++short+s%3B+//+2+bytes%0A++++bool+b%3B+//+1+byte%0A++++bool+b2%3B+//+1+byte%0A%7D%3B+//+BBB+is+sizeof(int)+*+2%0A%0Aint+main()%0A%7B+++printf(%22AAA+is+%25i+bytes%5Cn%22,+sizeof(struct+AAA))%3B%0A++++printf(%22BBB+is+%25i+bytes%5Cn%22,+sizeof(struct+BBB))%3B+%7D%0A'),l:'5',n:'0',o:'C+source+%231',t:'0')),k:51.24201339009319,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:cg132,deviceViewOpen:'1',filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,libs:!(),options:'-O1+-mavx2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+gcc+13.2+(Editor+%231)',t:'0')),k:27.914447192045646,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compilerName:'x86-64+gcc+13.2',editorid:1,fontScale:14,fontUsePx:'0',j:1,wrap:'1'),l:'5',n:'0',o:'Output+of+x86-64+gcc+13.2+(Compiler+%231)',t:'0')),header:(),k:20.843539417861177,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4)
+```
+#include <stdbool.h>
+#include <stdio.h>
+
+struct AAA {
+    bool b; // 1 byte
+    int i; // 4 bytes
+    short s; // 2 byte
+}; // AAA is sizeof(int) * 3
+struct BBB {
+    int i; // 4 bytes
+    short s; // 2 bytes
+    bool b; // 1 byte
+    bool b2; // 1 byte
+}; // BBB is sizeof(int) * 2
+
+int main()
+{   printf("AAA is %i bytes\n", sizeof(struct AAA));
+    printf("BBB is %i bytes\n", sizeof(struct BBB)); }
+```
+5.	Don't use loop unrolling.  
 Unrolling the loop will make the software bigger, and the code will less likely to fit in L1 cache.  
 Let the compilers do it. Even the compilers overdo it sometimes. So that's why -O2 exist on GCC, and not to use -O3.  
 It's very easy to overdo it and bloat the L1.  
@@ -494,27 +544,6 @@ cgui_mul_mat4:
         jne     .L4
         ret
 ```
-### Don't use inline
-A function call overhead is better than DRAM reads.  
-You only had 32 KiB of data cache and instruction cache in L1 to play around, and that's not much. So don't waste it.
-
-### Prefer procedural than pure functions
-Pure functions in C can lead overengineered structs, buggy, and inconsistent code.  
-And it force you to use malloc.
-It's hard to return the arrays in C without debugging for hours.  
-Another plus for not returning anything is, you can cut down a few lines of code.  
-So I invented a style called ASM. Because it looks like ASM codes. You use the first argument as the return value. And the other arguments can do anything else.  
-```
-void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
-{	for (size_t i = 0; i < 4; i++)
-	{	for (size_t j = 0; j < 4; j++)
-		{	mat->data[4 * j + i] = 0.0f;
-
-			for (size_t k = 0; k < 4; k++)
-			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
-```
-`mat` is used to store the result of `a` and `b` multiplication. It's still feels like pure functions. But way more efficient and slightly less safe.  
-This style will help you keep the variables on the stack, less debugging, and stopping you keep switching pure functions to procedural.
-
-### Avoid heap allocations
-Heap doesn't autofree. So don't use it for small or fixed size variables.  
+6.	Do loop interchange. Sometimes it's not possible, then you can ignore it.
+7.	Don't use loop blocking. I haven't found a case where it worked.
+8.	Do let the compiler do auto vectorization. Don't do it yourself. It makes the code harder to read.
