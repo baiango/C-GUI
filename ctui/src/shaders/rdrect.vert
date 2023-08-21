@@ -1,7 +1,5 @@
 #version 330 core
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 camMatrix;
 
 layout (location = 0) in vec3 aShape;
 uniform vec3 aColor;
@@ -15,7 +13,7 @@ out float roundness;
 
 
 void main() {
-	gl_Position = proj * view * model * vec4(aShape, 1.0f);
+	gl_Position = camMatrix * vec4(aShape, 1.0f);
 	shape = aShape;
 	color = aColor;
 	canva_dimension = aCanvaDimension;

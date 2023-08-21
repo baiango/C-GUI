@@ -1,5 +1,6 @@
 #include "src/types.h"
 #include "src/gltypes.h"
+#include "src/glmath.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -46,51 +47,74 @@ int32_t main()
 		rdrect.vertices = vertices;
 		rdrect.indices = indices;
 		rdrect.sizeof_vertices = sizeof(vertices);
-		rdrect.sizeof_indices = sizeof(indices); }
+		rdrect.sizeof_indices = sizeof(indices);
+		rdrect.row = 3;
+		rdrect.index_attribute = 0;
+		rdrect.prefix_sum_attribute = 0; }
 
 	cgui_cook_vertices(&rdrect);
-
-	// No need for a struct, they are really hard to printf.
-	float model[16] =
-	{	1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, -2.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f };
-	float view[16] =
-	{	1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f };
-	float proj[16] =
-	{	1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f };
 
 	GLuint shad_pgm_rdrect = cgui_init_shaders(
 	        "src/shaders/rdrect.vert",
 	        "src/shaders/rdrect.frag"
 	    );
 	cgui_set_uniform3f("aColor", 0.5f, 0.5f, 1.0f, shad_pgm_rdrect);
-	cgui_set_uniform2f("canva_size", 1.0f, 0.6f, shad_pgm_rdrect);
-	cgui_set_uniform1f("roundness", 0.4f, shad_pgm_rdrect);
+	cgui_set_uniform2f("aCanvaDimension", 1.0f, 0.6f, shad_pgm_rdrect);
+	cgui_set_uniform1f("aRoundness", 0.4f, shad_pgm_rdrect);
+
+	struct mat4 view;
+	cgui_set_mat4(&view,
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f );
+	struct mat4 proj;
+	cgui_set_mat4(&proj,
+	    1.0f, 0.0f, 0.0f, 0.0f,
+	    0.0f, 1.0f, 0.0f, 0.0f,
+	    0.0f, 0.0f, 1.0f, 0.0f,
+	    0.0f, 0.0f, 0.0f, 1.0f );
+
+	struct vec3f position;
+	struct vec3f rotation;
+	struct vec3f up;
+	cgui_set_vec3f_from_floats(&position, 1.0f, -2.0f, 0.0f);
+	cgui_set_vec3f_from_floats(&rotation, 0.0f, 0.0f, -1.0f);
+	cgui_set_vec3f_from_floats(&up, 0.0f, 1.0f, 0.0f);
+
+	struct vec3f tmp;
+	cgui_add_vec3f(&tmp, &position, &rotation);
+	cgui_lookat(&view, &position, &tmp, &up);
+	cgui_prt_mat4(&view);
+	printf("\n");
+
+	cgui_perspective(&proj, 45.0f * CGUI_ONE_DEG_IN_RAD, 1.0f, 0.01f, 100.0f);
+	cgui_prt_mat4(&proj);
+	printf("\n");
+
+	struct mat4 view_proj_mat;
+	cgui_zero_mat4(&view_proj_mat);
+	cgui_mul_mat4(&view_proj_mat, &view, &proj);
+	cgui_prt_mat4(&view_proj_mat);
+	printf("\n");
+
+	cgui_prt_GLError();
 
 	// Don't use black. It's good for hiding bugs under it.
 	GLfloat bg_col = 0x20 / 256.0f;
-
-	for (size_t i = 0; i < 16; i++)
-	{	printf("%f\n", model[i]); }
-
-	cgui_prtGLError();
 
 	while (!glfwWindowShouldClose(window))
 	{	// Input
 		glfwPollEvents();
 		// 2D render
+		glEnable(GL_BLEND);
 		glUseProgram(shad_pgm_rdrect);
 		glBindVertexArray(rdrect.vao);
 
+		GLuint uni_cam_matrix = glGetUniformLocation(shad_pgm_rdrect, "camMatrix");
+		glUniformMatrix4fv(uni_cam_matrix, 1, GL_FALSE, view_proj_mat.data);
 		glDrawElements(GL_TRIANGLES, rdrect.sizeof_indices, GL_UNSIGNED_INT, NULL);
+		glDisable(GL_BLEND);
 		// End
 		glfwSwapBuffers(window);
 		glClearColor(bg_col, bg_col, bg_col, 1.0f);

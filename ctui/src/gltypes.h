@@ -4,6 +4,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+
+void cgui_prt_GLError()
+{	GLenum err;
+
+	while (GL_NO_ERROR != (err = glGetError())) { printf("OpenGL Error: %i\n", err); } }
 
 
 struct Mesh
@@ -20,6 +27,92 @@ struct Mesh
 struct PointerPoolGL
 {	GLuint* VAOs, * VBOs, * EBOs;
 	GLuint* shader_programs; };
+
+
+struct vec3f { float x, y, z; };
+
+
+void cgui_set_vec3f_from_floats(struct vec3f* vec, float x, float y, float z)
+{	vec->x = x;
+	vec->y = y;
+	vec->z = z; }
+
+void cgui_set_vec3f_from_vec3f(struct vec3f* dest, const struct vec3f* src)
+{	dest->x = src->x;
+	dest->y = src->y;
+	dest->z = src->z; }
+
+void cgui_prt_vec3f(struct vec3f* vec)
+{	struct vec3f prt;
+	prt.x = vec->x;
+	prt.y = vec->y;
+	prt.z = vec->z;
+
+	if (fabs(prt.x) < 1e-10)
+	{	prt.x = 0.0f; }
+
+	if (fabs(prt.y) < 1e-10)
+	{	prt.y = 0.0f; }
+
+	if (fabs(prt.z) < 1e-10)
+	{	prt.z = 0.0f; }
+
+	printf("(%.3f, %.3f, %.3f)\n", prt.x, prt.y, prt.z); }
+
+struct mat4 { float data[16]; };
+
+
+void cgui_set_mat4
+(	struct mat4* mat,
+    float m00, float m01, float m02, float m03,
+    float m10, float m11, float m12, float m13,
+    float m20, float m21, float m22, float m23,
+    float m30, float m31, float m32, float m33 )
+{	mat->data[0] = m00;
+	mat->data[1] = m01;
+	mat->data[2] = m02;
+	mat->data[3] = m03;
+
+	mat->data[4] = m10;
+	mat->data[5] = m11;
+	mat->data[6] = m12;
+	mat->data[7] = m13;
+
+	mat->data[8] = m20;
+	mat->data[9] = m21;
+	mat->data[10] = m22;
+	mat->data[11] = m23;
+
+	mat->data[12] = m30;
+	mat->data[13] = m31;
+	mat->data[14] = m32;
+	mat->data[15] = m33; }
+
+
+void cgui_zero_mat4(struct mat4* mat)
+{	for (size_t i = 0; i < 16; i++)
+	{	mat->data[i] = 0.0f; } }
+
+
+void cgui_set_diagonal_mat4(struct mat4* mat, float flt)
+{	mat->data[0] = flt;
+	mat->data[4 * 1 + 1] = flt;
+	mat->data[4 * 2 + 2] = flt;
+	mat->data[4 * 3 + 3] = flt; }
+
+
+void cgui_prt_mat4(struct mat4* mat)
+{	for (size_t i = 0; i < 16; i++)
+	{	// Replace -0 with 0 for easier reading.
+		float value = mat->data[i];
+
+		if (fabs(value) < 1e-10)
+		{	value = 0.0f; }
+
+		printf("%.3f ", value);
+
+		if ((i + 1) % 4 == 0)
+		{	printf("\n"); } } }
 
 
 void cgui_unbindAll()
@@ -85,8 +178,16 @@ void cgui_unbindAll()
 // 18.	And clean out the hidden canva with the solid color.
 //		glClearColor(bg_col, bg_col, bg_col, 1.0f);
 //		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-struct Mesh cgui_cook_vertices(struct Mesh* mesh)
-{	cgui_unbindAll();
+void cgui_cook_vertices(struct Mesh* mesh)
+{	if (2 >= mesh->row || 10 <= mesh->row)
+	{	printf("row is %llu! Are you sure?\n", mesh->row); }
+
+	if (mesh->index_attribute)
+	{	printf("index_attribute is %llu! Please set it to 0 first.\n", mesh->index_attribute); }
+
+	if (mesh->prefix_sum_attribute)
+	{	printf("prefix_sum_attribute is %llu! Please set it to 0 first.\n", mesh->prefix_sum_attribute); }
+
 	glGenVertexArrays(1, &mesh->vao); // New VAO
 	glBindVertexArray(mesh->vao); // Bind VAO
 
@@ -95,15 +196,13 @@ struct Mesh cgui_cook_vertices(struct Mesh* mesh)
 	glBufferData(GL_ARRAY_BUFFER, mesh->sizeof_vertices, mesh->vertices, GL_STATIC_DRAW); // Add vertices
 	// Set range of the vertices to read
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->row * sizeof(GLfloat), NULL);
-	mesh->index_attribute++;
-	mesh->prefix_sum_attribute += 3;
+	mesh->index_attribute = 1;
+	mesh->prefix_sum_attribute = 3;
 
 	glGenBuffers(1, &mesh->ebo); // New EBO
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo); // Bind EBO
 	// Set range of the indices to read
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->sizeof_indices, mesh->indices, GL_STATIC_DRAW);
-
-	return *mesh; }
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->sizeof_indices, mesh->indices, GL_STATIC_DRAW); }
 
 
 struct Mesh cgui_add_attribute(GLint size, struct Mesh* mesh)
@@ -152,6 +251,7 @@ char* cgui_read_file(char* path)
 		return ""; }
 
 	return content; }
+
 
 GLuint cgui_init_shaders(char* vertex_path, char* fragment_path)
 {	char* vertex_source = cgui_read_file(vertex_path);
@@ -214,11 +314,6 @@ void cgui_set_uniform3f
 (	char* name,
     float param0, float param1, float param2,
     GLuint shader_program)
-{	GLuint uni3f = glGetUniformLocation(shader_program, name);
+{	glUseProgram(shader_program);
+	GLuint uni3f = glGetUniformLocation(shader_program, name);
 	glUniform3f(uni3f, param0, param1, param2); }
-
-
-void cgui_prtGLError()
-{	GLenum err;
-
-	while ((err = glGetError()) != GL_NO_ERROR) { printf("OpenGL Error: %d\n", err); } }
