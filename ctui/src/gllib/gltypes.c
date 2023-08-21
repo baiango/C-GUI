@@ -233,7 +233,7 @@ void cgui_prt_vec3f(struct Vec3f* vec)
 	if (fabs(prt.z) < 1e-10)
 	{	prt.z = 0.0f; }
 
-	printf("(%.3f, %.3f, %.3f)\n", prt.x, prt.y, prt.z); }
+	printf("(%g, %g, %g)\n", prt.x, prt.y, prt.z); }
 
 
 void cgui_set_mat4
@@ -280,7 +280,7 @@ void cgui_prt_mat4(struct mat4* mat)
 		if (fabs(value) < 1e-10)
 		{	value = 0.0f; }
 
-		printf("%.3f ", value);
+		printf("%g ", value);
 
 		if ((i + 1) % 4 == 0)
 		{	printf("\n"); } } }

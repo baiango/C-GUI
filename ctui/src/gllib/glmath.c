@@ -10,7 +10,6 @@ void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
 			for (size_t k = 0; k < 4; k++)
 			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
 
-
 // fovy: Vertical field of view angle in degrees.
 // aspect: Aspect ratio of the viewport. It's calculated as width / height.
 // z_near: Objects closer than this value will not be visible.
@@ -73,11 +72,11 @@ float cgui_dot(struct Vec3f* a, struct Vec3f* b)
 
 void cgui_lookat
 (	struct mat4* mat,
-    struct Vec3f* pos_eye,
-    struct Vec3f* center_point,
+    struct Vec3f* pos_camera,
+    struct Vec3f* target,
     struct Vec3f* i_up)
 {	struct Vec3f forward;
-	cgui_sub_vec3f(&forward, center_point, pos_eye);
+	cgui_sub_vec3f(&forward, target, pos_camera);
 	cgui_normalize_vec3f(&forward);
 
 	struct Vec3f right;
@@ -97,6 +96,42 @@ void cgui_lookat
 	mat->data[2] = -forward.x;
 	mat->data[4 * 1 + 2] = -forward.y;
 	mat->data[4 * 2 + 2] = -forward.z;
-	mat->data[4 * 3] = -cgui_dot(&right, pos_eye);
-	mat->data[4 * 3 + 1] = -cgui_dot(&up, pos_eye);
-	mat->data[4 * 3 + 2] = cgui_dot(&forward, pos_eye); }
+	mat->data[4 * 3] = -cgui_dot(&right, pos_camera);
+	mat->data[4 * 3 + 1] = -cgui_dot(&up, pos_camera);
+	mat->data[4 * 3 + 2] = cgui_dot(&forward, pos_camera); }
+
+
+// Let's assune that we want 1 meter canva from 16:9 monitor.
+//	struct Vec3f camera_position;
+//	struct Vec3f camera_target;
+//	struct Vec3f camera_up;
+//	cgui_set_vec3f_from_floats(&camera_position, 0.0f, -0.0f, -1.0f);
+//	cgui_set_vec3f_from_floats(&camera_target, 0.0f, 0.0f, 0.0f);
+//	cgui_set_vec3f_from_floats(&camera_up, 0.0f, 1.0f, 0.0f);
+//
+//	struct mat4 view2;
+//	cgui_lookat(&view2, &camera_position, &camera_target, &camera_up);
+//	float left = -0.5f; // Half a meter from middle to the left
+//	float right = 0.5f; // Half a meter from middle to the right
+//	float bottom = -0.28125f; // 16:9 aspect ratio, so -0.5 * 9 / 16 = -0.28125
+//	float top = 0.28125f; // 16:9 aspect ratio, so 0.5 * 9 / 16 = 0.28125
+//	float near = 0.01f; // Anything closer than this will clip
+//	float far = 4000.0f; // Anything further than this will clip
+//
+//	cgui_ortho(&view2, left, right, bottom, top, near, far);
+void cgui_ortho(
+	struct mat4* mat,
+	float left,
+	float right,
+	float bottom,
+	float top,
+	float z_near,
+	float z_far)
+{	cgui_zero_mat4(mat);
+	cgui_set_diagonal_mat4(mat, 1.0f);
+	mat->data[0] = 2.0f / (right - left);
+	mat->data[4 * 1 + 1] = 2.0f / (top - bottom);
+	mat->data[4 * 2 + 2] = -2.0f / (z_far - z_near);
+	mat->data[4 * 3] = -(right + left) / (right - left);
+	mat->data[4 * 3 + 1] = -(top + bottom) / (top - bottom);
+	mat->data[4 * 3 + 2] = -(z_far + z_near) / (z_far - z_near); }
