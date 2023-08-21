@@ -1,7 +1,3 @@
-#pragma once
-#include <math.h>
-
-
 const float CGUI_ONE_DEG_IN_RAD = 0.0174533f;
 float cgui_deg_to_rad(float degrees) { return degrees * 0.0174533f; }
 
@@ -33,19 +29,19 @@ void cgui_perspective
 	mat->data[4 * 3 + 2] = -(2.0f * z_far * z_near) / (z_far - z_near); }
 
 
-void cgui_add_vec3f(struct vec3f* vec, struct vec3f* a, struct vec3f* b)
+void cgui_add_vec3f(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b)
 {	vec->x = a->x + b->x;
 	vec->y = a->y + b->y;
 	vec->z = a->z + b->z; }
 
 
-void cgui_sub_vec3f(struct vec3f* vec, struct vec3f* a, struct vec3f* b)
+void cgui_sub_vec3f(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b)
 {	vec->x = a->x - b->x;
 	vec->y = a->y - b->y;
 	vec->z = a->z - b->z; }
 
 
-void cgui_normalize_vec3f(struct vec3f* vec)
+void cgui_normalize_vec3f(struct Vec3f* vec)
 {	if (0.0f == vec->x + vec->y + vec->z)
 	{	printf("cgui_normalize_vec3f: Zeroed vector found! Skipping...");
 		return; }
@@ -60,7 +56,7 @@ void cgui_normalize_vec3f(struct vec3f* vec)
 	vec->z *= inv_length; }
 
 
-void cgui_cross_vec3f(struct vec3f* vec, struct vec3f* a, struct vec3f* b)
+void cgui_cross(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b)
 {	vec->x = a->y * b->z
 	    - a->z * b->y;
 	vec->y = a->z * b->x
@@ -69,7 +65,7 @@ void cgui_cross_vec3f(struct vec3f* vec, struct vec3f* a, struct vec3f* b)
 	    - a->y * b->x; }
 
 
-float cgui_dot(struct vec3f* a, struct vec3f* b)
+float cgui_dot(struct Vec3f* a, struct Vec3f* b)
 {	return a->x * b->x
 	    + a->y * b->y
 	    + a->z * b->z; }
@@ -77,19 +73,19 @@ float cgui_dot(struct vec3f* a, struct vec3f* b)
 
 void cgui_lookat
 (	struct mat4* mat,
-    struct vec3f* pos_eye,
-    struct vec3f* center_point,
-    struct vec3f* i_up)
-{	struct vec3f forward;
+    struct Vec3f* pos_eye,
+    struct Vec3f* center_point,
+    struct Vec3f* i_up)
+{	struct Vec3f forward;
 	cgui_sub_vec3f(&forward, center_point, pos_eye);
 	cgui_normalize_vec3f(&forward);
 
-	struct vec3f right;
-	cgui_cross_vec3f(&right, &forward, i_up);
+	struct Vec3f right;
+	cgui_cross(&right, &forward, i_up);
 	cgui_normalize_vec3f(&right);
 
-	struct vec3f up;
-	cgui_cross_vec3f(&up, &right, &forward);
+	struct Vec3f up;
+	cgui_cross(&up, &right, &forward);
 
 	cgui_set_diagonal_mat4(mat, 1.0f);
 	mat->data[0] = right.x;

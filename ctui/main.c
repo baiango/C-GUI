@@ -1,6 +1,4 @@
-#include "src/types.h"
-#include "src/gltypes.h"
-#include "src/glmath.h"
+#include "src/gllib/import.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -75,14 +73,14 @@ int32_t main()
 	    0.0f, 0.0f, 1.0f, 0.0f,
 	    0.0f, 0.0f, 0.0f, 1.0f );
 
-	struct vec3f position;
-	struct vec3f rotation;
-	struct vec3f up;
+	struct Vec3f position;
+	struct Vec3f rotation;
+	struct Vec3f up;
 	cgui_set_vec3f_from_floats(&position, 1.0f, -2.0f, 0.0f);
 	cgui_set_vec3f_from_floats(&rotation, 0.0f, 0.0f, -1.0f);
 	cgui_set_vec3f_from_floats(&up, 0.0f, 1.0f, 0.0f);
 
-	struct vec3f tmp;
+	struct Vec3f tmp;
 	cgui_add_vec3f(&tmp, &position, &rotation);
 	cgui_lookat(&view, &position, &tmp, &up);
 	cgui_prt_mat4(&view);
