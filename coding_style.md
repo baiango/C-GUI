@@ -499,7 +499,7 @@ A function call overhead is better than DRAM reads.
 You only had 32 KiB of data cache and instruction cache in L1 to play around, and that's not much. So don't waste it.
 
 ### Prefer procedural than pure functions
-Pure functions in C can lead overengineered, buggy, and inconsistent code.  
+Pure functions in C can lead overengineered structs, buggy, and inconsistent code.  
 And it force you to use malloc.
 It's hard to return the arrays in C without debugging for hours.  
 Another plus for not returning anything is, you can cut down a few lines of code.  
