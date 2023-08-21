@@ -275,3 +275,246 @@ pyramid.cook_vertices();
 pyramid.add_attribute(3) // Color
 pyramid.add_attribute(2); // UV
 ```
+# C
+### Don't hand unrolling the loop
+Unrolling the loop will make the software bigger, and the code will less likely to fit in L1 cache.  
+Let the compilers do it. Even the compilers overdo it sometimes. So that's why -O2 exist on GCC, and not to use -O3.  
+It's very easy to overdo it and bloat the L1.  
+```
+#include <stdlib.h>
+
+struct mat4
+{	float data[16]; };
+
+void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
+{	for (size_t i = 0; i < 4; i++)
+	{	for (size_t j = 0; j < 4; j++)
+		{	mat->data[4 * j + i] = 0.0f;
+
+			for (size_t k = 0; k < 4; k++)
+			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
+```
+[-O2 -mavx2:](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,selection:(endColumn:1,endLineNumber:13,positionColumn:1,positionLineNumber:13,selectionStartColumn:1,selectionStartLineNumber:13,startColumn:1,startLineNumber:13),source:'%23include+%3Cstdlib.h%3E%0A%0Astruct+mat4%0A%7B%09float+data%5B16%5D%3B+%7D%3B%0A%0Avoid+cgui_mul_mat4(struct+mat4*+mat,+struct+mat4*+a,+struct+mat4*+b)%0A%7B%09for+(size_t+i+%3D+0%3B+i+%3C+4%3B+i%2B%2B)%0A%09%7B%09for+(size_t+j+%3D+0%3B+j+%3C+4%3B+j%2B%2B)%0A%09%09%7B%09mat-%3Edata%5B4+*+j+%2B+i%5D+%3D+0.0f%3B%0A%0A%09%09%09for+(size_t+k+%3D+0%3B+k+%3C+4%3B+k%2B%2B)%0A%09%09%09%7B%09mat-%3Edata%5B4+*+j+%2B+i%5D+%2B%3D+a-%3Edata%5B4+*+k+%2B+i%5D+*+b-%3Edata%5B4+*+j+%2B+k%5D%3B+%7D+%7D+%7D+%7D%0A'),l:'5',n:'0',o:'C+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:cg132,deviceViewOpen:'1',filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,libs:!(),options:'-O2+-mavx2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+gcc+13.2+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4)
+```
+cgui_mul_mat4:
+        xor     r11d, r11d
+.L2:
+        lea     r8, [rdi+r11*4]
+        mov     r9, rdx
+        xor     r10d, r10d
+.L4:
+        mov     DWORD PTR [r8], 0x00000000
+        mov     rcx, rsi
+        vxorps  xmm1, xmm1, xmm1
+        xor     eax, eax
+.L3:
+        vmovss  xmm0, DWORD PTR [rcx]
+        vmulss  xmm0, xmm0, DWORD PTR [r9+rax*4]
+        add     rax, 1
+        add     rcx, 16
+        vaddss  xmm1, xmm1, xmm0
+        vmovss  DWORD PTR [r8], xmm1
+        cmp     rax, 4
+        jne     .L3
+        add     r10, 4
+        add     r8, 16
+        add     r9, 16
+        cmp     r10, 16
+        jne     .L4
+        add     r11, 1
+        add     rsi, 4
+        cmp     r11, 4
+        jne     .L2
+        ret
+```
+[-O3 -mavx3:](https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,selection:(endColumn:1,endLineNumber:13,positionColumn:1,positionLineNumber:13,selectionStartColumn:1,selectionStartLineNumber:13,startColumn:1,startLineNumber:13),source:'%23include+%3Cstdlib.h%3E%0A%0Astruct+mat4%0A%7B%09float+data%5B16%5D%3B+%7D%3B%0A%0Avoid+cgui_mul_mat4(struct+mat4*+mat,+struct+mat4*+a,+struct+mat4*+b)%0A%7B%09for+(size_t+i+%3D+0%3B+i+%3C+4%3B+i%2B%2B)%0A%09%7B%09for+(size_t+j+%3D+0%3B+j+%3C+4%3B+j%2B%2B)%0A%09%09%7B%09mat-%3Edata%5B4+*+j+%2B+i%5D+%3D+0.0f%3B%0A%0A%09%09%09for+(size_t+k+%3D+0%3B+k+%3C+4%3B+k%2B%2B)%0A%09%09%09%7B%09mat-%3Edata%5B4+*+j+%2B+i%5D+%2B%3D+a-%3Edata%5B4+*+k+%2B+i%5D+*+b-%3Edata%5B4+*+j+%2B+k%5D%3B+%7D+%7D+%7D+%7D%0A'),l:'5',n:'0',o:'C+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:cg132,deviceViewOpen:'1',filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:___c,libs:!(),options:'-O3+-mavx2',overrides:!(),selection:(endColumn:1,endLineNumber:1,positionColumn:1,positionLineNumber:1,selectionStartColumn:1,selectionStartLineNumber:1,startColumn:1,startLineNumber:1),source:1),l:'5',n:'0',o:'+x86-64+gcc+13.2+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4)
+```
+cgui_mul_mat4:
+        mov     rcx, rsi
+        mov     rax, rdx
+        cmp     rdi, rdx
+        je      .L2
+        vmovss  xmm5, DWORD PTR [rdx]
+        vxorps  xmm6, xmm6, xmm6
+        vmovss  xmm8, DWORD PTR [rdx+8]
+        vmovss  xmm7, DWORD PTR [rdx+4]
+        mov     esi, DWORD PTR [rdx+12]
+        vmovss  xmm15, DWORD PTR [rax+20]
+        mov     edx, DWORD PTR [rdx+16]
+        vshufps xmm5, xmm5, xmm5, 0
+        vmovss  xmm14, DWORD PTR [rax+24]
+        vmovss  xmm12, DWORD PTR [rax+28]
+        vshufps xmm7, xmm7, xmm7, 0
+        vmovss  xmm4, DWORD PTR [rax+32]
+        vmovss  xmm3, DWORD PTR [rax+36]
+        vshufps xmm15, xmm15, xmm15, 0
+        vmovss  xmm1, DWORD PTR [rax+40]
+        vmovss  xmm11, DWORD PTR [rax+44]
+        vshufps xmm14, xmm14, xmm14, 0
+        vshufps xmm12, xmm12, xmm12, 0
+        vmovss  xmm0, DWORD PTR [rax+48]
+        vmovss  xmm10, DWORD PTR [rax+52]
+        vshufps xmm4, xmm4, xmm4, 0
+        vshufps xmm3, xmm3, xmm3, 0
+        vmovss  xmm2, DWORD PTR [rax+56]
+        vmovss  xmm9, DWORD PTR [rax+60]
+        vmovups XMMWORD PTR [rdi], xmm6
+        vshufps xmm1, xmm1, xmm1, 0
+        vmulps  xmm5, xmm5, XMMWORD PTR [rcx]
+        vshufps xmm0, xmm0, xmm0, 0
+        vaddps  xmm5, xmm5, xmm6
+        vmovups XMMWORD PTR [rdi], xmm5
+        vmulps  xmm7, xmm7, XMMWORD PTR [rcx+16]
+        vaddps  xmm7, xmm7, xmm5
+        vshufps xmm5, xmm8, xmm8, 0
+        vmovups XMMWORD PTR [rdi], xmm7
+        vmovups xmm13, XMMWORD PTR [rcx+32]
+        vmulps  xmm5, xmm5, xmm13
+        vmulps  xmm13, xmm14, xmm13
+        vaddps  xmm5, xmm5, xmm7
+        vmovd   xmm7, esi
+        vshufps xmm7, xmm7, xmm7, 0
+        vmovups XMMWORD PTR [rdi], xmm5
+        vmovups xmm8, XMMWORD PTR [rcx+48]
+        vmovups XMMWORD PTR [rdi+16], xmm6
+        vmulps  xmm7, xmm7, xmm8
+        vmulps  xmm12, xmm12, xmm8
+        vaddps  xmm7, xmm7, xmm5
+        vmovd   xmm5, edx
+        vshufps xmm5, xmm5, xmm5, 0
+        vmovups XMMWORD PTR [rdi], xmm7
+        vmovups xmm7, XMMWORD PTR [rcx]
+        vmulps  xmm5, xmm5, xmm7
+        vmulps  xmm4, xmm4, xmm7
+        vmulps  xmm0, xmm0, xmm7
+        vaddps  xmm5, xmm5, xmm6
+        vaddps  xmm4, xmm4, xmm6
+        vaddps  xmm0, xmm0, xmm6
+        vmovups XMMWORD PTR [rdi+16], xmm5
+        vmulps  xmm15, xmm15, XMMWORD PTR [rcx+16]
+        vmovups XMMWORD PTR [rdi+32], xmm4
+        vaddps  xmm5, xmm15, xmm5
+        vaddps  xmm5, xmm5, xmm13
+        vaddps  xmm5, xmm5, xmm12
+        vmovups XMMWORD PTR [rdi+16], xmm5
+        vmovups xmm5, XMMWORD PTR [rcx+16]
+        vmulps  xmm3, xmm3, xmm5
+        vaddps  xmm3, xmm3, xmm4
+        vmovups XMMWORD PTR [rdi+32], xmm3
+        vmulps  xmm1, xmm1, XMMWORD PTR [rcx+32]
+        vaddps  xmm1, xmm1, xmm3
+        vshufps xmm3, xmm11, xmm11, 0
+        vmulps  xmm3, xmm3, xmm8
+        vaddps  xmm1, xmm1, xmm3
+        vmovups XMMWORD PTR [rdi+32], xmm1
+        vshufps xmm1, xmm10, xmm10, 0
+        vmulps  xmm1, xmm1, xmm5
+        vaddps  xmm0, xmm0, xmm1
+        vshufps xmm1, xmm2, xmm2, 0
+        vmovups XMMWORD PTR [rdi+48], xmm0
+        vmulps  xmm1, xmm1, XMMWORD PTR [rcx+32]
+        vaddps  xmm0, xmm1, xmm0
+        vshufps xmm1, xmm9, xmm9, 0
+        vmovups XMMWORD PTR [rdi+48], xmm0
+        vmulps  xmm1, xmm1, XMMWORD PTR [rcx+48]
+        vaddps  xmm0, xmm1, xmm0
+        vmovups XMMWORD PTR [rdi+48], xmm0
+        ret
+.L2:
+        mov     rsi, rdx
+        vxorps  xmm3, xmm3, xmm3
+        mov     rdx, rcx
+        lea     rcx, [rax+16]
+.L4:
+        mov     DWORD PTR [rsi], 0x00000000
+        vmovss  xmm1, DWORD PTR [rax]
+        add     rsi, 4
+        add     rdx, 4
+        vmulss  xmm1, xmm1, DWORD PTR [rdx-4]
+        vaddss  xmm1, xmm1, xmm3
+        vmovss  DWORD PTR [rsi-4], xmm1
+        vmovss  xmm0, DWORD PTR [rdx+12]
+        vmulss  xmm0, xmm0, DWORD PTR [rax+4]
+        vaddss  xmm0, xmm0, xmm1
+        vmovss  DWORD PTR [rsi-4], xmm0
+        vmovss  xmm1, DWORD PTR [rdx+28]
+        vmulss  xmm2, xmm1, DWORD PTR [rax+8]
+        vaddss  xmm0, xmm2, xmm0
+        vmovss  DWORD PTR [rsi-4], xmm0
+        vmovss  xmm2, DWORD PTR [rdx+44]
+        vmulss  xmm4, xmm2, DWORD PTR [rax+12]
+        mov     DWORD PTR [rsi+12], 0x00000000
+        vaddss  xmm0, xmm4, xmm0
+        vmovss  DWORD PTR [rsi-4], xmm0
+        vmovss  xmm0, DWORD PTR [rdx-4]
+        vmulss  xmm5, xmm0, DWORD PTR [rax+16]
+        vaddss  xmm5, xmm5, xmm3
+        vmovss  DWORD PTR [rsi+12], xmm5
+        vmovss  xmm4, DWORD PTR [rdx+12]
+        vmulss  xmm4, xmm4, DWORD PTR [rax+20]
+        vaddss  xmm4, xmm4, xmm5
+        vmovss  DWORD PTR [rsi+12], xmm4
+        vmulss  xmm1, xmm1, DWORD PTR [rax+24]
+        vaddss  xmm1, xmm1, xmm4
+        vmovss  DWORD PTR [rsi+12], xmm1
+        vmulss  xmm4, xmm2, DWORD PTR [rax+28]
+        mov     DWORD PTR [rsi+28], 0x00000000
+        vaddss  xmm1, xmm4, xmm1
+        vmovss  DWORD PTR [rsi+12], xmm1
+        vmulss  xmm4, xmm0, DWORD PTR [rax+32]
+        vaddss  xmm4, xmm4, xmm3
+        vmovss  DWORD PTR [rsi+28], xmm4
+        vmovss  xmm1, DWORD PTR [rdx+12]
+        vmulss  xmm5, xmm1, DWORD PTR [rax+36]
+        vaddss  xmm5, xmm5, xmm4
+        vmovss  DWORD PTR [rsi+28], xmm5
+        vmovss  xmm4, DWORD PTR [rdx+28]
+        vmulss  xmm4, xmm4, DWORD PTR [rax+40]
+        vaddss  xmm4, xmm4, xmm5
+        vmovss  DWORD PTR [rsi+28], xmm4
+        vmulss  xmm2, xmm2, DWORD PTR [rax+44]
+        mov     DWORD PTR [rsi+44], 0x00000000
+        vaddss  xmm2, xmm2, xmm4
+        vmovss  DWORD PTR [rsi+28], xmm2
+        vmulss  xmm0, xmm0, DWORD PTR [rax+48]
+        vaddss  xmm0, xmm0, xmm3
+        vmovss  DWORD PTR [rsi+44], xmm0
+        vmulss  xmm1, xmm1, DWORD PTR [rax+52]
+        vaddss  xmm0, xmm1, xmm0
+        vmovss  DWORD PTR [rsi+44], xmm0
+        vmovss  xmm1, DWORD PTR [rdx+28]
+        vmulss  xmm1, xmm1, DWORD PTR [rax+56]
+        vaddss  xmm0, xmm1, xmm0
+        vmovss  DWORD PTR [rsi+44], xmm0
+        vmovss  xmm1, DWORD PTR [rdx+44]
+        vmulss  xmm1, xmm1, DWORD PTR [rax+60]
+        vaddss  xmm0, xmm1, xmm0
+        vmovss  DWORD PTR [rsi+44], xmm0
+        cmp     rcx, rsi
+        jne     .L4
+        ret
+```
+### Don't use inline
+A function call overhead is better than DRAM reads.  
+You only had 32 KiB of data cache and instruction cache in L1 to play around, and that's not much. So don't waste it.
+
+### Prefer procedural than pure functions
+Pure functions in C can lead overengineered, buggy, and inconsistent code.  
+And it force you to use malloc.
+It's hard to return the arrays in C without debugging for hours.  
+Another plus for not returning anything is, you can cut down a few lines of code.  
+So I invented a style called ASM. Because it looks like ASM codes. You use the first argument as the return value. And the other arguments can do anything else.  
+```
+void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
+{	for (size_t i = 0; i < 4; i++)
+	{	for (size_t j = 0; j < 4; j++)
+		{	mat->data[4 * j + i] = 0.0f;
+
+			for (size_t k = 0; k < 4; k++)
+			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
+```
+`mat` is used to store the result of `a` and `b` multiplication. It's still feels like pure functions. But way more efficient and slightly less safe.  
+This style will help you keep the variables on the stack, less debugging, and stopping you keep switching pure functions to procedural.
+
+### Avoid heap allocations
+Heap doesn't autofree. So don't use it for small or fixed size variables.  
