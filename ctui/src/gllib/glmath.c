@@ -118,15 +118,19 @@ void cgui_lookat
 //	float near = 0.01f; // Anything closer than this will clip
 //	float far = 4000.0f; // Anything further than this will clip
 //
-//	cgui_ortho(&view2, left, right, bottom, top, near, far);
-void cgui_ortho(
-	struct mat4* mat,
-	float left,
-	float right,
-	float bottom,
-	float top,
-	float z_near,
-	float z_far)
+//	struct mat4 ortho_proj;
+//	cgui_ortho(&ortho_proj, left, right, bottom, top, near, far);
+//
+//	struct mat4 ortho_view_proj;
+//	cgui_mul_mat4(&ortho_view_proj, &ortho_proj, &view2);
+void cgui_ortho
+(	struct mat4* mat,
+    float left,
+    float right,
+    float bottom,
+    float top,
+    float z_near,
+    float z_far)
 {	cgui_zero_mat4(mat);
 	cgui_set_diagonal_mat4(mat, 1.0f);
 	mat->data[0] = 2.0f / (right - left);

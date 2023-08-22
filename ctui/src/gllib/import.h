@@ -42,6 +42,17 @@ struct mat4 { float data[16]; };
 // gltypes.c Function //
 void cgui_prt_GLError();
 void cgui_unbindAll();
+char* cgui_read_file(char* path);
+GLuint cgui_init_shaders(char* vertex_path, char* fragment_path);
+void cgui_set_uniform1f(char* name, float param0, GLuint shader_program);
+void cgui_set_uniform2f
+(	char* name,
+    float param0, float param1,
+    GLuint shader_program);
+void cgui_set_uniform3f
+(	char* name,
+    float param0, float param1, float param2,
+    GLuint shader_program);
 void cgui_cook_vertices(struct Mesh* mesh);
 struct Mesh cgui_add_attribute(GLint size, struct Mesh* mesh);
 void cgui_set_vec3f_from_floats(struct Vec3f* vec, float x, float y, float z);
@@ -56,17 +67,7 @@ void cgui_set_mat4
 void cgui_zero_mat4(struct mat4* mat);
 void cgui_set_diagonal_mat4(struct mat4* mat, float flt);
 void cgui_prt_mat4(struct mat4* mat);
-char* cgui_read_file(char* path);
-GLuint cgui_init_shaders(char* vertex_path, char* fragment_path);
-void cgui_set_uniform1f(char* name, float param0, GLuint shader_program);
-void cgui_set_uniform2f
-(	char* name,
-    float param0, float param1,
-    GLuint shader_program);
-void cgui_set_uniform3f
-(	char* name,
-    float param0, float param1, float param2,
-    GLuint shader_program);
+
 #include "gltypes.c"
 
 // glmath.c Global //
@@ -79,6 +80,8 @@ void cgui_perspective
 (	struct mat4* mat,
     float fovy, float aspect,
     float z_near, float z_far);
+void cgui_add_vec3f(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b);
+void cgui_sub_vec3f(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b);
 void cgui_normalize_vec3f(struct Vec3f* vec);
 void cgui_cross(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b);
 float cgui_dot(struct Vec3f* a, struct Vec3f* b);
@@ -87,4 +90,13 @@ void cgui_lookat
     struct Vec3f* pos_eye,
     struct Vec3f* center_point,
     struct Vec3f* i_up);
+void cgui_ortho
+(	struct mat4* mat,
+    float left,
+    float right,
+    float bottom,
+    float top,
+    float z_near,
+    float z_far);
+
 #include "glmath.c"
