@@ -237,7 +237,7 @@ void cgui_prt_vec3f(struct Vec3f* vec)
 
 
 void cgui_set_mat4
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float m00, float m01, float m02, float m03,
     float m10, float m11, float m12, float m13,
     float m20, float m21, float m22, float m23,
@@ -262,17 +262,17 @@ void cgui_set_mat4
 	mat->data[14] = m32;
 	mat->data[15] = m33; }
 
-void cgui_zero_mat4(struct mat4* mat)
+void cgui_zero_mat4(struct Mat4* mat)
 {	for (size_t i = 0; i < 16; i++)
 	{	mat->data[i] = 0.0f; } }
 
-void cgui_set_diagonal_mat4(struct mat4* mat, float flt)
+void cgui_set_diagonal_mat4(struct Mat4* mat, float flt)
 {	mat->data[0] = flt;
 	mat->data[4 * 1 + 1] = flt;
 	mat->data[4 * 2 + 2] = flt;
 	mat->data[4 * 3 + 3] = flt; }
 
-void cgui_prt_mat4(struct mat4* mat)
+void cgui_prt_mat4(struct Mat4* mat)
 {	for (size_t i = 0; i < 16; i++)
 	{	float value = mat->data[i];
 

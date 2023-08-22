@@ -37,7 +37,7 @@ struct Col8 { uint8_t r, g, b; };
 struct Col8a { uint8_t r, g, b, a; };
 struct Col5a { uint16_t rgba; };
 
-struct mat4 { float data[16]; };
+struct Mat4 { float data[16]; };
 
 // gltypes.c Function //
 void cgui_prt_GLError();
@@ -59,14 +59,14 @@ void cgui_set_vec3f_from_floats(struct Vec3f* vec, float x, float y, float z);
 void cgui_set_vec3f_from_vec3f(struct Vec3f* dest, const struct Vec3f* src);
 void cgui_prt_vec3f(struct Vec3f* vec);
 void cgui_set_mat4
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float m00, float m01, float m02, float m03,
     float m10, float m11, float m12, float m13,
     float m20, float m21, float m22, float m23,
     float m30, float m31, float m32, float m33 );
-void cgui_zero_mat4(struct mat4* mat);
-void cgui_set_diagonal_mat4(struct mat4* mat, float flt);
-void cgui_prt_mat4(struct mat4* mat);
+void cgui_zero_mat4(struct Mat4* mat);
+void cgui_set_diagonal_mat4(struct Mat4* mat, float flt);
+void cgui_prt_mat4(struct Mat4* mat);
 
 #include "gltypes.c"
 
@@ -75,9 +75,9 @@ const float CGUI_ONE_DEG_IN_RAD;
 // glmath.c Struct //
 // glmath.c Function //
 float cgui_deg_to_rad(float degrees);
-void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b);
+void cgui_mul_mat4(struct Mat4* mat, struct Mat4* a, struct Mat4* b);
 void cgui_perspective
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float fovy, float aspect,
     float z_near, float z_far);
 void cgui_add_vec3f(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b);
@@ -86,12 +86,12 @@ void cgui_normalize_vec3f(struct Vec3f* vec);
 void cgui_cross(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b);
 float cgui_dot(struct Vec3f* a, struct Vec3f* b);
 void cgui_lookat
-(	struct mat4* mat,
+(	struct Mat4* mat,
     struct Vec3f* pos_eye,
     struct Vec3f* center_point,
     struct Vec3f* i_up);
 void cgui_ortho
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float left,
     float right,
     float bottom,

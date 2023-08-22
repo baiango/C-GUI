@@ -2,7 +2,7 @@ const float CGUI_ONE_DEG_IN_RAD = 0.0174533f;
 float cgui_deg_to_rad(float degrees) { return degrees * 0.0174533f; }
 
 
-void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
+void cgui_mul_mat4(struct Mat4* mat, struct Mat4* a, struct Mat4* b)
 {	for (size_t i = 0; i < 4; i++)
 	{	for (size_t j = 0; j < 4; j++)
 		{	mat->data[4 * j + i] = 0.0f;
@@ -15,7 +15,7 @@ void cgui_mul_mat4(struct mat4* mat, struct mat4* a, struct mat4* b)
 // z_near: Objects closer than this value will not be visible.
 // z_far: Objects farther away than this value will not be visible.
 void cgui_perspective
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float fovy, float aspect,
     float z_near, float z_far)
 {	float tan_half_fovy = tan(fovy / 2.0f);
@@ -71,7 +71,7 @@ float cgui_dot(struct Vec3f* a, struct Vec3f* b)
 
 
 void cgui_lookat
-(	struct mat4* mat,
+(	struct Mat4* mat,
     struct Vec3f* pos_camera,
     struct Vec3f* target,
     struct Vec3f* i_up)
@@ -109,7 +109,7 @@ void cgui_lookat
 //	cgui_set_vec3f_from_floats(&camera_target, 0.0f, 0.0f, 0.0f);
 //	cgui_set_vec3f_from_floats(&camera_up, 0.0f, 1.0f, 0.0f);
 //
-//	struct mat4 view2;
+//	struct Mat4 view2;
 //	cgui_lookat(&view2, &camera_position, &camera_target, &camera_up);
 //	float left = -0.5f; // Half a meter from middle to the left
 //	float right = 0.5f; // Half a meter from middle to the right
@@ -118,13 +118,13 @@ void cgui_lookat
 //	float near = 0.01f; // Anything closer than this will clip
 //	float far = 4000.0f; // Anything further than this will clip
 //
-//	struct mat4 ortho_proj;
+//	struct Mat4 ortho_proj;
 //	cgui_ortho(&ortho_proj, left, right, bottom, top, near, far);
 //
-//	struct mat4 ortho_view_proj;
+//	struct Mat4 ortho_view_proj;
 //	cgui_mul_mat4(&ortho_view_proj, &ortho_proj, &view2);
 void cgui_ortho
-(	struct mat4* mat,
+(	struct Mat4* mat,
     float left,
     float right,
     float bottom,

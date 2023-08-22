@@ -65,13 +65,13 @@ int32_t main()
 	//	cgui_set_vec3f_from_floats(&camera_target, 0.0f, 0.0f, 0.0f);
 	//	cgui_set_vec3f_from_floats(&camera_up, 0.0f, 1.0f, 0.0f);
 	//
-	//	struct mat4 view;
+	//	struct Mat4 view;
 	//	cgui_lookat(&view, &camera_position, &camera_target, &camera_up);
 	//
-	//	struct mat4 ortho_proj;
+	//	struct Mat4 ortho_proj;
 	//	cgui_ortho(&ortho_proj, -0.5f, 0.5f, -0.5f, 0.5f, 0.01f, 4000.0f);
 	//
-	//	struct mat4 ortho_view_proj;
+	//	struct Mat4 ortho_view_proj;
 	//	cgui_mul_mat4(&ortho_view_proj, &ortho_proj, &view);
 	//
 	//	cgui_prt_mat4(&view);
