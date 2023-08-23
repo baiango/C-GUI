@@ -1,3 +1,6 @@
+#include "glmath.h"
+
+
 const float CGUI_ONE_DEG_IN_RAD = 0.0174533f;
 float cgui_deg_to_rad(float degrees) { return degrees * 0.0174533f; }
 
@@ -9,6 +12,7 @@ void cgui_mul_mat4(struct Mat4* mat, struct Mat4* a, struct Mat4* b)
 
 			for (size_t k = 0; k < 4; k++)
 			{	mat->data[4 * j + i] += a->data[4 * k + i] * b->data[4 * j + k]; } } } }
+
 
 // fovy: Vertical field of view angle in degrees.
 // aspect: Aspect ratio of the viewport. It's calculated as width / height.

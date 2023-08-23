@@ -1,10 +1,13 @@
-void cgui_prt_GLError()
+#include "gltypes.h"
+
+
+void cgui_prt_gl_error()
 {	GLenum err;
 
 	while (GL_NO_ERROR != (err = glGetError())) { printf("OpenGL Error: %i\n", err); } }
 
 
-void cgui_unbindAll()
+void cgui_unbind_all()
 {	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -126,7 +129,7 @@ void cgui_set_uniform3f
 // 7.	Set range of the indices to read using glBufferData()
 //		(Optionally)
 // 8.	Maybe unbind it make sure other mesh won't use it.
-//		(I guard it with cgui_unbindAll(). So I don't have worry about it.)
+//		(I guard it with cgui_unbind_all(). So I don't have worry about it.)
 // 9.	Maybe enable more attribute using glEnableVertexAttribArray().
 // 10.	Add more attribute to send it to the vertex shader using glVertexAttribPointer().
 //		Example. vertex color, scale, and position.
@@ -178,6 +181,8 @@ void cgui_cook_vertices(struct Mesh* mesh)
 
 	if (mesh->prefix_sum_attribute)
 	{	printf("prefix_sum_attribute is %llu! Please set it to 0 first.\n", mesh->prefix_sum_attribute); }
+
+	cgui_unbind_all();
 
 	glGenVertexArrays(1, &mesh->vao); // New VAO
 	glBindVertexArray(mesh->vao); // Bind VAO
