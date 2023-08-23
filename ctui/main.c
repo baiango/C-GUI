@@ -1,11 +1,5 @@
 #include "src/gllib/import.h"
 
-
-#if defined(__TINYC__) // tcc doesn't play well with headers
-	#include "src/gllib/gltypes.c"
-	#include "src/gllib/glmath.c"
-#endif
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 

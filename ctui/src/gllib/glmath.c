@@ -5,7 +5,7 @@ const float CGUI_ONE_DEG_IN_RAD = 0.0174533f;
 float cgui_deg_to_rad(float degrees) { return degrees * 0.0174533f; }
 
 
-void cgui_mul_mat4(struct Mat4* mat, struct Mat4* a, struct Mat4* b)
+void cgui_mul_mat4(struct Mat4* restrict mat, struct Mat4* a, struct Mat4* b)
 {	for (size_t i = 0; i < 4; i++)
 	{	for (size_t j = 0; j < 4; j++)
 		{	mat->data[4 * j + i] = 0.0f;
@@ -59,7 +59,7 @@ void cgui_normalize_vec3f(struct Vec3f* vec)
 	vec->z *= inv_length; }
 
 
-void cgui_cross(struct Vec3f* vec, struct Vec3f* a, struct Vec3f* b)
+void cgui_cross(struct Vec3f* restrict vec, struct Vec3f* a, struct Vec3f* b)
 {	vec->x = a->y * b->z
 	    - a->z * b->y;
 	vec->y = a->z * b->x

@@ -54,9 +54,9 @@ void cgui_set_uniform3f
     float param0, float param1, float param2,
     GLuint shader_program);
 void cgui_cook_vertices(struct Mesh* mesh);
-struct Mesh cgui_add_attribute(GLint size, struct Mesh* mesh);
+void cgui_add_attribute(GLint size, struct Mesh* mesh);
 void cgui_set_vec3f_from_floats(struct Vec3f* vec, float x, float y, float z);
-void cgui_set_vec3f_from_vec3f(struct Vec3f* dest, const struct Vec3f* src);
+void cgui_set_vec3f_from_vec3f(struct Vec3f* restrict vec, struct Vec3f* src);
 void cgui_prt_vec3f(struct Vec3f* vec);
 void cgui_set_mat4
 (	struct Mat4* mat,

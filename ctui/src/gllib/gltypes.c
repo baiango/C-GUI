@@ -200,7 +200,7 @@ void cgui_cook_vertices(struct Mesh* mesh)
 	// Set range of the indices to read
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->sizeof_indices, mesh->indices, GL_STATIC_DRAW); }
 
-struct Mesh cgui_add_attribute(GLint size, struct Mesh* mesh)
+void cgui_add_attribute(GLint size, struct Mesh* mesh)
 {	glEnableVertexAttribArray(mesh->index_attribute);
 	glVertexAttribPointer(
 	    mesh->index_attribute, size, GL_FLOAT, GL_FALSE,
@@ -208,8 +208,7 @@ struct Mesh cgui_add_attribute(GLint size, struct Mesh* mesh)
 	    (void*)(mesh->prefix_sum_attribute * sizeof(GLfloat))
 	);
 	mesh->index_attribute++;
-	mesh->prefix_sum_attribute += size;
-	return *mesh; }
+	mesh->prefix_sum_attribute += size; }
 
 
 void cgui_set_vec3f_from_floats(struct Vec3f* vec, float x, float y, float z)
@@ -217,10 +216,10 @@ void cgui_set_vec3f_from_floats(struct Vec3f* vec, float x, float y, float z)
 	vec->y = y;
 	vec->z = z; }
 
-void cgui_set_vec3f_from_vec3f(struct Vec3f* dest, const struct Vec3f* src)
-{	dest->x = src->x;
-	dest->y = src->y;
-	dest->z = src->z; }
+void cgui_set_vec3f_from_vec3f(struct Vec3f* restrict vec, struct Vec3f* src)
+{	vec->x = src->x;
+	vec->y = src->y;
+	vec->z = src->z; }
 
 void cgui_prt_vec3f(struct Vec3f* vec)
 {	struct Vec3f prt;
