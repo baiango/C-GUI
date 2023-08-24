@@ -90,7 +90,7 @@ void cgui_lookat
 	struct Vec3f up;
 	cgui_cross(&up, &right, &forward);
 
-	cgui_set_diagonal_mat4(mat, 1.0f);
+	cgui_set_diagonal_mat4(mat, 1.0f); // +=i.4 4
 	mat->data[0] = right.x;
 	mat->data[4 * 1] = right.y;
 	mat->data[4 * 2] = right.z;
@@ -123,7 +123,12 @@ void cgui_lookat
 //	float far = 4000.0f; // Anything further than this will clip
 //
 //	struct Mat4 ortho_proj;
-//	cgui_ortho(&ortho_proj, left, right, bottom, top, near, far);
+//	float scale = 0.1f;
+//	cgui_ortho(&ortho_proj,
+//		left / scale, right / scale,
+//		bottom / scale, top / scale,
+//		near, far
+//	);
 //
 //	struct Mat4 ortho_view_proj;
 //	cgui_mul_mat4(&ortho_view_proj, &ortho_proj, &view2);

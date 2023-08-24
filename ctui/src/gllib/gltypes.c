@@ -266,15 +266,20 @@ void cgui_set_mat4
 	mat->data[14] = m32;
 	mat->data[15] = m33; }
 
+
+// 4 4$0
 void cgui_zero_mat4(struct Mat4* mat)
 {	for (size_t i = 0; i < 16; i++)
 	{	mat->data[i] = 0.0f; } }
 
+
+// +=i.4 4
 void cgui_set_diagonal_mat4(struct Mat4* mat, float flt)
 {	mat->data[0] = flt;
 	mat->data[4 * 1 + 1] = flt;
 	mat->data[4 * 2 + 2] = flt;
 	mat->data[4 * 3 + 3] = flt; }
+
 
 void cgui_prt_mat4(struct Mat4* mat)
 {	for (size_t i = 0; i < 16; i++)

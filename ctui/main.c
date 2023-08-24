@@ -69,7 +69,13 @@ int32_t main()
 	cgui_lookat(&view, &camera_position, &camera_target, &camera_up);
 
 	struct Mat4 ortho_proj;
-	cgui_ortho(&ortho_proj, -0.5f, 0.5f, -0.5f, 0.5f, 0.01f, 4000.0f);
+	float scale = 0.1f;
+	cgui_ortho(
+	    &ortho_proj,
+	    -0.5f / scale, 0.5f / scale,
+	    -0.5f / scale, 0.5f / scale,
+	    0.01f, 4000.0f
+	);
 
 	struct Mat4 ortho_view_proj;
 	cgui_mul_mat4(&ortho_view_proj, &ortho_proj, &view);

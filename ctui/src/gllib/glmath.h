@@ -34,3 +34,7 @@ void cgui_ortho
     float top,
     float z_near,
     float z_far);
+
+#if defined(__TINYC__) // tcc doesn't play well with headers
+	#include "glmath.c"
+#endif
