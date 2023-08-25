@@ -33,14 +33,14 @@ int32_t main()
 	printf("%s\n", gpu_name);
 
 	// 2D
+	GLfloat vertices[] =
+		{	-0.5f, -0.3f, 0.0f,
+			-0.5f,  0.3f, 0.0f,
+			0.5f,  -0.3f, 0.0f,
+			0.5f,   0.3f, 0.0f };
+	GLuint indices[] = {0, 1, 2, 1, 2, 3 };
 	struct Mesh rdrect;
-	{	GLfloat vertices[] =
-		{	-0.5f, -0.3f, -0.1f,
-			-0.5f,  0.3f, -0.1f,
-			0.5f,  -0.3f, -0.1f,
-			0.5f,   0.3f, -0.1f };
-		GLuint indices[] = {0, 1, 2, 1, 2, 3 };
-		rdrect.vertices = vertices;
+	{	rdrect.vertices = vertices;
 		rdrect.indices = indices;
 		rdrect.sizeof_vertices = sizeof(vertices);
 		rdrect.sizeof_indices = sizeof(indices);
@@ -91,7 +91,6 @@ int32_t main()
 	GLfloat bg_col = 0x20 / 256.0f;
 
 	cgui_unbind_all();
-	cgui_prt_gl_error();
 
 	while (!glfwWindowShouldClose(window))
 	{	// Input
@@ -109,4 +108,5 @@ int32_t main()
 		// End
 		glfwSwapBuffers(window);
 		glClearColor(bg_col, bg_col, bg_col, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); } }
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		cgui_prt_gl_error(); } }

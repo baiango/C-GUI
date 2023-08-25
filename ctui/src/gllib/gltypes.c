@@ -174,13 +174,13 @@ void cgui_set_uniform3f
 //		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 void cgui_cook_vertices(struct Mesh* mesh)
 {	if (2 >= mesh->row || 10 <= mesh->row)
-	{	printf("row is %llu! Are you sure?\n", mesh->row); }
+	{	printf("row is %hu! Are you sure?\n", mesh->row); }
 
 	if (mesh->index_attribute)
-	{	printf("index_attribute is %llu! Please set it to 0 first.\n", mesh->index_attribute); }
+	{	printf("index_attribute is %hu! Please set it to 0 first.\n", mesh->index_attribute); }
 
 	if (mesh->prefix_sum_attribute)
-	{	printf("prefix_sum_attribute is %llu! Please set it to 0 first.\n", mesh->prefix_sum_attribute); }
+	{	printf("prefix_sum_attribute is %hu! Please set it to 0 first.\n", mesh->prefix_sum_attribute); }
 
 	cgui_unbind_all();
 

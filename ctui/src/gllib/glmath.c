@@ -90,6 +90,7 @@ void cgui_lookat
 	struct Vec3f up;
 	cgui_cross(&up, &right, &forward);
 
+	cgui_zero_mat4(mat);
 	cgui_set_diagonal_mat4(mat, 1.0f); // +=i.4 4
 	mat->data[0] = right.x;
 	mat->data[4 * 1] = right.y;

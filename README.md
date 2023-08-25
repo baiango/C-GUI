@@ -10,9 +10,9 @@ I use C because of the simplicity, which is critical for GUI program. And Rust/C
 So Rust is only used for long computation time things/algorithms.
 
 # How to compile
-Only Tiny C Compiler is officially supported.  
+Only Tiny C Compiler and Microsoft Visual C++ through CMake is officially supported.  
 This software is possible compile in Clang with minimal compiler options tweak if you want speed over size, due to using Clang as static analyzer for detecting bugs. But not tested for runtime bugs from Clang.  
-It might be able compile in GCC and MSVC, but there's no guarantee.
+It might be able compile in GCC, but there's no guarantee.  
 
 There's a batch file called `build.bat`. It will compile itself with the [Tiny C Compiler](https://www.bellard.org/tcc/).
 

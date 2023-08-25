@@ -9,3 +9,6 @@ nppBackup
 *.o
 ctui/check-cppcheck-build-dir
 *.plist
+ctui/.vs
+ctui/out
+ctui/build
