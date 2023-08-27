@@ -34,11 +34,11 @@ int32_t main()
 
 	// 2D
 	GLfloat vertices[] =
-		{	-0.5f, -0.3f, 0.0f,
-			-0.5f,  0.3f, 0.0f,
-			0.5f,  -0.3f, 0.0f,
-			0.5f,   0.3f, 0.0f };
-	GLuint indices[] = {0, 1, 2, 1, 2, 3 };
+	{	-0.5f, -0.3f, 0.0f,
+		-0.5f,  0.3f, 0.0f,
+		0.5f,  -0.3f, 0.0f,
+		0.5f,   0.3f, 0.0f };
+	GLuint indices[] = { 0, 1, 2, 1, 2, 3 };
 	struct Mesh rdrect;
 	{	rdrect.vertices = vertices;
 		rdrect.indices = indices;
