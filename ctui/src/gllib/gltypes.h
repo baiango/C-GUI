@@ -68,7 +68,3 @@ void cgui_set_mat4
 void cgui_zero_mat4(struct Mat4* mat);
 void cgui_set_diagonal_mat4(struct Mat4* mat, float flt);
 void cgui_prt_mat4(struct Mat4* mat);
-
-#if defined(__TINYC__) // tcc doesn't play well with headers
-	#include "gltypes.c"
-#endif
