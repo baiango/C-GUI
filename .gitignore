@@ -12,8 +12,11 @@ ctui/check-cppcheck-build-dir
 ctui/.vs
 ctui/out
 ctui/build
-
+GLMLib/.vs
+GLMLib/x64
 
 # Added by cargo
 
 /target
+*.lib
+GLMLib/glmlib.u2d
