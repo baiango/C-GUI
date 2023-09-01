@@ -12,3 +12,8 @@ ctui/check-cppcheck-build-dir
 ctui/.vs
 ctui/out
 ctui/build
+
+
+# Added by cargo
+
+/target
