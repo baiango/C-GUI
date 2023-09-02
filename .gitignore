@@ -20,3 +20,5 @@ GLMLib/x64
 /target
 *.lib
 GLMLib/glmlib.u2d
+glmath.opt.yaml
+glmodule.mod

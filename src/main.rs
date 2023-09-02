@@ -1,19 +1,9 @@
-extern {
-	// Declare the Fortran subroutine and its arguments
-	fn CGUI_CROSS(vec: *mut Vec3f, a: *const Vec3f, b: *const Vec3f);
-}
-
-// Define the Vec3f type for Rust
-#[repr(C)]
-pub struct Vec3f {
-	pub x: f32,
-	pub y: f32,
-	pub z: f32,
-}
-
 extern crate glfw;
+mod glmlib;
 
 use glfw::{Action, Context, Key};
+use glmlib::Vec3f;
+
 
 fn main() {
 	// Initialize Vec3f instances
@@ -23,7 +13,7 @@ fn main() {
 
 	// Call the Fortran subroutine from Rust
 	unsafe {
-		CGUI_CROSS(&mut result, &a, &b);
+		glmlib::cross(&mut result, &a, &b);
 	}
 
 	// Print the result

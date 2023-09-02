@@ -16,7 +16,7 @@
 			<Tool Name="VFPostBuildEventTool"/>
 		</Configuration>
 		<Configuration Name="Debug|x64" UseCompiler="ifxCompiler" ConfigurationType="typeStaticLibrary">
-			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/Z7 /pdbfile:&quot;x64\Debug\glmlib.pdb&quot; /debug-parameters:all" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Diagnostics="diagnosticsShowAll" WarnInterfaces="true" ExternalNameInterpretation="extNameLowerCase" EmitSourceListing="true" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 			<Tool Name="VFLibrarianTool"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,8 +35,8 @@
 			<Tool Name="VFPreBuildEventTool"/>
 			<Tool Name="VFPostBuildEventTool"/>
 		</Configuration>
-		<Configuration Name="Release|x64" ConfigurationType="typeStaticLibrary">
-			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+		<Configuration Name="Release|x64" UseCompiler="ifxCompiler" ConfigurationType="typeStaticLibrary" WholeProgramOptimization="true">
+			<Tool Name="VFFortranCompilerTool" AdditionalOptions="/Z7" SuppressStartupBanner="true" Optimization="optimizeFull" Parallelization="true" OptDiagLevel="odlLevel1" EmitOptDiagToFile="true" ExternalNameInterpretation="extNameLowerCase" EmitSourceListing="true" RuntimeChecks="rtChecksNone" RuntimeLibrary="rtMultiThreadedDLL"/>
 			<Tool Name="VFLibrarianTool"/>
 			<Tool Name="VFResourceCompilerTool"/>
 			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
