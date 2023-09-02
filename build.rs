@@ -3,6 +3,24 @@ use std::path::Path;
 use std::process::Command;
 
 
+fn build(path: &str, arguments: &[&str]) {
+	// Define the command and its arguments
+	let cmd = Command::new(path)
+		.args(arguments)
+		.output()
+		.expect("Failed to execute command");
+
+	// Print the output of the command (stdout and stderr)
+	println!("stdout: {:?}", String::from_utf8_lossy(&cmd.stdout));
+	println!("stderr: {:?}", String::from_utf8_lossy(&cmd.stderr));
+
+	// Check the exit status of the command
+	if !cmd.status.success() {
+		panic!("Command failed with exit status: {:?}", cmd.status);
+	}
+}
+
+
 fn main() {
 	let output_dir = Path::new("GLMLib\\x64\\Release\\");
 
@@ -33,45 +51,36 @@ fn main() {
 		}
 	}
 
-	// Define the command and its arguments
-	let obj_output = Command::new("C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\bin\\ifx")
-		.args(&[
-			"/O3",
-			format!("/object:{}", output_dir.display()).as_str(),
-			"/c",
-			"/Qlocation,link,\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\"",
-			"/names:lowercase",
-			"GLMLib\\glmath.f90",
-		])
-		.output()
-		.expect("Failed to execute command");
-
-	// Print the output of the command (stdout and stderr)
-	println!("stdout: {:?}", String::from_utf8_lossy(&obj_output.stdout));
-	println!("stderr: {:?}", String::from_utf8_lossy(&obj_output.stderr));
-
-	// Check the exit status of the command
-	if !obj_output.status.success() {
-		panic!("Command failed with exit status: {:?}", obj_output.status);
+	let optimizion_str;
+	#[cfg(debug_assertions)] {
+	optimizion_str = "/Od";
+	}
+	#[cfg(not(debug_assertions))] {
+	optimizion_str = "/O3";
 	}
 
-	// Define the command and its arguments
-	let lib_output = Command::new("C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\Hostx64\\x64\\lib")
-		.args(&[
-			format!("/OUT:{}glmlib.lib", output_dir.display()).as_str(),
-			format!("{}glmath.obj", output_dir.display()).as_str(),
-		])
-		.output()
-		.expect("Failed to execute command");
+	let ifx_path = "ifx";
+	let output_obj_str = format!("/object:{}", output_dir.display());
+	let ifx_arguments = [
+		&optimizion_str,
+		&output_obj_str.as_str(),
+		"/c",
+		"/Qlocation,link,\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\"",
+		"/names:lowercase",
+		"GLMLib\\glmath.f90",
+	];
 
-	// Print the output of the command (stdout and stderr)
-	println!("stdout: {:?}", String::from_utf8_lossy(&lib_output.stdout));
-	println!("stderr: {:?}", String::from_utf8_lossy(&lib_output.stderr));
+	build(ifx_path, &ifx_arguments);
 
-	// Check the exit status of the command
-	if !lib_output.status.success() {
-		panic!("Command failed with exit status: {:?}", lib_output.status);
-	}
+	let lib_path = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\Hostx64\\x64\\lib";
+	let output_lib_str = format!("/OUT:{}glmlib.lib", output_dir.display());
+	let input_obj_str = format!("{}glmath.obj", output_dir.display());
+	let lib_arguments: [&str; 2] = [
+		&output_lib_str,
+		&input_obj_str,
+	];
+
+	build(lib_path, &lib_arguments);
 
 	println!("cargo:rustc-link-lib=static={}glmlib", output_dir.display());  // Link the static Fortran library
 	println!("cargo:rustc-link-search=native=C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\compiler\\lib\\intel64_win");
