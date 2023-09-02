@@ -3,6 +3,8 @@ use std::path::Path;
 use std::process::Command;
 
 
+// You might want to compile this twice
+// because Rust doesn't wait for the library to compile
 fn build(path: &str, arguments: &[&str]) {
 	// Define the command and its arguments
 	let cmd = Command::new(path)
@@ -22,7 +24,16 @@ fn build(path: &str, arguments: &[&str]) {
 
 
 fn main() {
-	let output_dir = Path::new("GLMLib\\x64\\Release\\");
+	let output_dir;
+	let optimizion_str;
+	#[cfg(debug_assertions)] {
+	optimizion_str = "/Od";
+	output_dir = Path::new("GLMLib\\x64\\Debug\\");
+	}
+	#[cfg(not(debug_assertions))] {
+	optimizion_str = "/O3";
+	output_dir = Path::new("GLMLib\\x64\\Release\\");
+	}
 
 	// Create the output directory if it doesn't exist
 	if !output_dir.exists() {
@@ -51,14 +62,6 @@ fn main() {
 		}
 	}
 
-	let optimizion_str;
-	#[cfg(debug_assertions)] {
-	optimizion_str = "/Od";
-	}
-	#[cfg(not(debug_assertions))] {
-	optimizion_str = "/O3";
-	}
-
 	let ifx_path = "ifx";
 	let output_obj_str = format!("/object:{}", output_dir.display());
 	let ifx_arguments = [
@@ -81,6 +84,17 @@ fn main() {
 	];
 
 	build(lib_path, &lib_arguments);
+
+	let output_asm_path: &str = &format!("/Fa{}glmath.asm", output_dir.display());
+	let ifx_asm_arguments = [
+		&optimizion_str,
+		&output_asm_path,
+		"/S",
+		"/names:lowercase",
+		"GLMLib\\glmath.f90"
+	];
+
+	build(ifx_path, &ifx_asm_arguments);
 
 	println!("cargo:rustc-link-lib=static={}glmlib", output_dir.display());  // Link the static Fortran library
 	println!("cargo:rustc-link-search=native=C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\compiler\\lib\\intel64_win");
