@@ -14,11 +14,10 @@ ctui/out
 ctui/build
 GLMLib/.vs
 GLMLib/x64
+*.lib
+GLMLib/glmlib.u2d
+glmodule.mod
 
 # Added by cargo
 
 /target
-*.lib
-GLMLib/glmlib.u2d
-glmath.opt.yaml
-glmodule.mod

@@ -4,6 +4,7 @@ module GLModule
 		integer :: x, y
 	end type Vec2i
 	! There are no unsigned in Fortran
+	! and no signed 64 unless you set the size
 	type :: Vec2f
 		real :: x, y
 	end type Vec2f
@@ -17,19 +18,9 @@ module GLModule
 	type :: Vec3f
 		real :: x, y, z
 	end type Vec3f
-	type :: Vec3f64
+	type :: Vec3d
 		double precision :: x, y, z
-	end type Vec3f64
-
-	type :: Col8
-		integer(1) :: r, g, b
-	end type Col8
-	type :: Col8a
-		integer(1) :: r, g, b, a
-	end type Col8a
-	type :: Col5
-		integer(2) :: rgba
-	end type Col5
+	end type Vec3d
 
 	! The reason for 1D is easier to expend with multiplications
 	! 2D flattening will require divisions and modulo,
@@ -132,7 +123,7 @@ end subroutine sub_vec3f
 
 subroutine normalize_vec3f(vec)
 	use GLModule
-	type(Vec3f), intent(out) :: vec
+	type(Vec3f), intent(inout) :: vec
 	real :: length, inv_length
 
 	if (abs(vec%x + vec%y + vec%z) < 1.0e-6) then
@@ -162,12 +153,12 @@ subroutine cross(vec, a, b)
 end subroutine cross
 
 
-subroutine dot(ret, a, b)
+subroutine dot(vec, a, b)
 	use GLModule
-	real, intent(out) :: ret
+	real, intent(out) :: vec
 	type(Vec3f), intent(in) :: a, b
 
-	ret = a%x * b%x &
+	vec = a%x * b%x &
 		+ a%y * b%y &
 		+ a%z * b%z
 end subroutine dot
