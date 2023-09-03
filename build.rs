@@ -66,6 +66,7 @@ fn main() {
 	let output_obj_str = format!("/object:{}", output_dir.display());
 	let ifx_arguments = [
 		&optimizion_str,
+		"/arch:core-avx2",
 		&output_obj_str.as_str(),
 		"/c",
 		"/Qlocation,link,\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\"",
@@ -87,6 +88,7 @@ fn main() {
 
 	let output_asm_path: &str = &format!("/Fa{}glmath.asm", output_dir.display());
 	let ifx_asm_arguments = [
+		"/arch:core-avx2",
 		&optimizion_str,
 		&output_asm_path,
 		"/S",
@@ -96,6 +98,8 @@ fn main() {
 
 	build(ifx_path, &ifx_asm_arguments);
 
+	println!("cargo:rustc-cfg=avx2");
+	println!("cargo:rustc-cfg=target_feature=\"avx2\"");
 	println!("cargo:rustc-link-lib=static={}glmlib", output_dir.display());  // Link the static Fortran library
 	println!("cargo:rustc-link-search=native=C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\compiler\\lib\\intel64_win");
 }
