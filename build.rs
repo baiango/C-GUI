@@ -62,7 +62,7 @@ fn main() {
 		}
 	}
 
-	let ifx_path = "ifx";
+	let ifx_path = "C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\bin\\ifx";
 	let output_obj_str = format!("/object:{}", output_dir.display());
 	let ifx_arguments = [
 		&optimizion_str,
