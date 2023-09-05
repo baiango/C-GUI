@@ -61,14 +61,15 @@ module GLMath
 			mat%data(i) = 0.0
 		end do
 
-		do i = 1, 4
+		! Use column-major to make it faster
+		do k = 1, 4
 			do j = 1, 4
-				do k = 1, 4
+				do i = 1, 4
 					mat%data(4 * j + i) = mat%data(4 * j + i) + (a%data(4 * k + i) * b%data(4 * j + k))
 				end do
 			end do
 		end do
-		end subroutine mul_mat4
+	end subroutine mul_mat4
 
 
 	! fovy: Vertical field of view angle in degrees.

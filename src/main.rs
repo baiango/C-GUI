@@ -15,7 +15,7 @@ fn main() {
 
 	// Call the Fortran subroutine from Rust
 	unsafe {
-		glmlib::cross(&mut result, &a, &b);
+	glmlib::cross(&mut result, &a, &b);
 	}
 
 	// Print the result
@@ -26,7 +26,7 @@ fn main() {
 	mymat.data[0] = 100.0;
 
 	unsafe {
-		glmlib::prt_mat4(&mymat);
+	glmlib::prt_mat4(&mymat);
 	}
 
 	//----- fust_gui::alloc::CVec -----//
@@ -37,6 +37,24 @@ fn main() {
 	let mut strvec = alloc::CVec::<&str>::new(10).unwrap();
 	strvec[5] = "123";
 	println!("{:?}", strvec);
+
+	//----- fust_gui::alloc::Auto512Num -----//
+	let mut intvec = alloc::Auto512Num::<i32>::new().unwrap();
+	intvec[5] = 1234;
+	println!("{:?}", intvec);
+	println!("{}", intvec.size());
+
+	let mut int64vec = alloc::Auto512Num::<u64>::new().unwrap();
+	int64vec[5] = 1234;
+	println!("{:?}", int64vec);
+
+	//----- fust_gui::alloc::NumVec -----//
+	let mut intvec = alloc::NumVec::<i32>::new(10).unwrap();
+	intvec[9] = 100;
+	println!("{:?}", intvec);
+
+	// Compiling error
+	//let mut strvec = alloc::NumVec::<&str>::new(10).unwrap();
 
 	//----- glfw -----//
 	let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
