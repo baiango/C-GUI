@@ -5,22 +5,25 @@ VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "glmlib", "glmlib.vfproj", "{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}"
 EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "unit_test", "unit_test.vfproj", "{B75848BD-3EA3-4EDA-A626-DDAFE2D0DA0B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815} = {0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Debug|x64.ActiveCfg = Debug|x64
 		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Debug|x64.Build.0 = Debug|x64
-		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Debug|x86.ActiveCfg = Debug|Win32
-		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Debug|x86.Build.0 = Debug|Win32
 		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Release|x64.ActiveCfg = Release|x64
 		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Release|x64.Build.0 = Release|x64
-		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Release|x86.ActiveCfg = Release|Win32
-		{0F24B1A5-ED7A-457F-8CD5-B6DC620EA815}.Release|x86.Build.0 = Release|Win32
+		{B75848BD-3EA3-4EDA-A626-DDAFE2D0DA0B}.Debug|x64.ActiveCfg = Debug|x64
+		{B75848BD-3EA3-4EDA-A626-DDAFE2D0DA0B}.Debug|x64.Build.0 = Debug|x64
+		{B75848BD-3EA3-4EDA-A626-DDAFE2D0DA0B}.Release|x64.ActiveCfg = Release|x64
+		{B75848BD-3EA3-4EDA-A626-DDAFE2D0DA0B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

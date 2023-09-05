@@ -15,8 +15,8 @@ ctui/build
 GLMLib/.vs
 GLMLib/x64
 *.lib
-GLMLib/glmlib.u2d
-glmodule.mod
+*.u2d
+*.mod
 
 # Added by cargo
 
