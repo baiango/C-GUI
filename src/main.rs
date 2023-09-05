@@ -19,6 +19,13 @@ fn main() {
 	// Print the result
 	println!("Result: x={}, y={}, z={}", result.x, result.y, result.z);
 
+	let mut mymat = glmlib::Mat4{ data: [0.0; 16] };
+	mymat.data[0] = 100.0;
+
+	unsafe {
+		glmlib::prt_mat4(&mymat);
+	}
+
 	let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
 	let (mut window, events) = glfw.create_window(300, 300, "Hello this is window", glfw::WindowMode::Windowed)

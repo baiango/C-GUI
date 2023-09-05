@@ -72,7 +72,7 @@ fn main() {
 		"/Qlocation,link,\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\"",
 		"/names:lowercase",
 		"GLMLib\\glmath.f90",
-		"GLMLib\\gldebug.f90",
+		"GLMLib\\glhelp.f90",
 	];
 
 	build(ifx_path, &ifx_arguments);
@@ -80,9 +80,11 @@ fn main() {
 	let lib_path = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\Hostx64\\x64\\lib";
 	let output_lib_str = format!("/OUT:{}glmlib.lib", output_dir.display());
 	let input_obj_str = format!("{}glmath.obj", output_dir.display());
-	let lib_arguments: [&str; 2] = [
+	let input_obj2_str = format!("{}glhelp.obj", output_dir.display());
+	let lib_arguments: &[&str] = &[
 		&output_lib_str,
 		&input_obj_str,
+		&input_obj2_str,
 	];
 
 	build(lib_path, &lib_arguments);
@@ -95,7 +97,7 @@ fn main() {
 		"/S",
 		"/names:lowercase",
 		"GLMLib\\glmath.f90",
-		"GLMLib\\gldebug.f90",
+		"GLMLib\\glhelp.f90",
 	];
 
 	build(ifx_path, &ifx_asm_arguments);

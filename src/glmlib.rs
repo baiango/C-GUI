@@ -104,8 +104,13 @@ extern {
 	);
 
 	#[link_name = "glmath_mp_ortho"]
-	pub fn ortho(mat: *mut *const Mat4, left: *const f32,
+	pub fn ortho(mat: *mut Mat4, left: *const f32,
 		right: *const f32, bottom: *const f32, top: *const f32,
 		z_near: *const f32, z_far: *const f32
 	);
+}
+
+extern {
+	#[link_name = "glhelp_mp_prt_mat4"]
+	pub fn prt_mat4(mat: *const Mat4);
 }
