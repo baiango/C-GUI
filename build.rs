@@ -72,6 +72,7 @@ fn main() {
 		"/Qlocation,link,\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\HostX64\\x64\"",
 		"/names:lowercase",
 		"GLMLib\\glmath.f90",
+		"GLMLib\\gldebug.f90",
 	];
 
 	build(ifx_path, &ifx_arguments);
@@ -86,14 +87,15 @@ fn main() {
 
 	build(lib_path, &lib_arguments);
 
-	let output_asm_path: &str = &format!("/Fa{}glmath.asm", output_dir.display());
+	let output_asm_path: &str = &format!("/Fa{}", output_dir.display());
 	let ifx_asm_arguments = [
 		"/arch:core-avx2",
 		&optimizion_str,
 		&output_asm_path,
 		"/S",
 		"/names:lowercase",
-		"GLMLib\\glmath.f90"
+		"GLMLib\\glmath.f90",
+		"GLMLib\\gldebug.f90",
 	];
 
 	build(ifx_path, &ifx_asm_arguments);
