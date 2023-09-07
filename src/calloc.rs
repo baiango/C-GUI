@@ -1,4 +1,5 @@
 use std::alloc::{alloc, dealloc, Layout};
+use std::cmp::max;
 use std::ptr;
 use std::ops::{Index, IndexMut};
 
@@ -132,13 +133,17 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		let twod_alloc_slice = unsafe { alloc(twod_layout_data) as *mut &mut [T] };
 		if twod_alloc_slice.is_null() { return Err("Memory allocation failed."); }
 
-		// Invalid memory access
+		// Invalid memory access????
 		unsafe { ptr::write_bytes(twod_alloc_slice, 0, twod_size); }
 
 		let twod_array_slices = unsafe { std::slice::from_raw_parts_mut(twod_alloc_slice, twod_size) };
 
 		// ----- 1D ----- //
-		let oned_layout = Layout::from_size_align(ONED_BYTE_SIZE, std::mem::align_of::<T>()).unwrap();
+		let oned_layout = Layout::from_size_align(
+			ONED_BYTE_SIZE,
+			std::mem::align_of::<T>()
+		)
+			.unwrap();
 
 		for i in 0..twod_size {
 			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
@@ -149,7 +154,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 			let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, oned_size) };
 
 			twod_array_ptrs[i] = oned_alloc_ptr;
-			// Invalid memory access
+			// Invalid memory access????
 			twod_array_slices[i] = oned_array;
 		}
 		// ----- 1D last index ----- //
@@ -161,7 +166,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, size & (oned_size - 1)) };
 
 		twod_array_ptrs[twod_size - 1] = oned_alloc_ptr;
-		// Invalid memory access
+		// Invalid memory access????
 		twod_array_slices[twod_size - 1] = oned_array;
 
 		Ok(FlxVec {
@@ -185,7 +190,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 
 		unsafe {
 		// ----- 1D ----- //
-		for i in self.twod_len..old_len - 1 {
+		for i in max(0, self.twod_len - 1)..old_len - 1 {
 			dealloc(
 				self.oned_ptrs[i] as *mut u8,
 				Layout::from_size_align_unchecked(self.oned_len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
@@ -204,14 +209,14 @@ impl<T: IsNumber> FlxVec<'_, T> {
 impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
 	fn index(&self, index: usize) -> &Self::Output {
-		// Invalid memory access
+		// Invalid memory access????
 		&self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
 	}
 }
 
 impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		// Invalid memory access
+		// Invalid memory access????
 		&mut self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
 	}
 }
