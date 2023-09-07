@@ -3,14 +3,16 @@ use std::ptr;
 use std::ops::{Index, IndexMut};
 
 
-// This(CVec) is for general use. Like... storing the pointers
-// Auto512Num and NumVec is made for auto-vectorization and numbers
-// So it will compute, read, and write faster than CVec
+// This(CVec) is for reuses. It can't resize very fast like FlxVec.
+// But it write and read faster than FlxVec because it doesn't stall like FlxVec
+// FlxVec is made for frequently resized arrays and numbers.
+// It has a size of 32 KiB array, so it will resize very fast.
+// But it will stall on every 32 KiB boundary
 #[derive(Debug)]
 pub(crate) struct CVec<'a, T> {
-	pub data_ptr: *mut T,
-	pub len: usize,
-	pub data: &'a mut [T],
+	pub ptr: *mut T, // You need it to free the array
+	pub data: &'a mut [T], // You need it to access the array
+	pub len: usize, // You need it to get the size in constant time O(1)
 }
 
 impl<T> CVec<'_, T> {
@@ -19,14 +21,14 @@ impl<T> CVec<'_, T> {
 		let element_layout = Layout::new::<T>();
 
 		// Calculate the layout for the slice
-		let slice_layout = Layout::from_size_align(
+		let layout = Layout::from_size_align(
 			size * element_layout.size(),
 			element_layout.align()
 		)
 		.unwrap();
 
 		// Allocate memory for the slice
-		let ptr = unsafe { alloc(slice_layout) as *mut T};
+		let ptr = unsafe { alloc(layout) as *mut T };
 
 		if ptr.is_null() { return Err("Memory allocation failed."); }
 
@@ -36,7 +38,7 @@ impl<T> CVec<'_, T> {
 		let array = unsafe { std::slice::from_raw_parts_mut(ptr, size) };
 
 		Ok(CVec {
-			data_ptr: ptr,
+			ptr: ptr,
 			len: size,
 			data: array,
 		})
@@ -60,7 +62,7 @@ impl<T> Drop for CVec<'_, T> {
 		unsafe {
 			// Deallocate the memory in the drop method
 		dealloc(
-			self.data_ptr as *mut u8,
+			self.ptr as *mut u8,
 			Layout::from_size_align_unchecked(self.len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
 		);
 		}
@@ -81,128 +83,118 @@ impl IsNumber for f32 {}
 impl IsNumber for f64 {}
 
 
-// Auto512Num is not merged in NumVec,
-// because the memory overhead O(n) is too high and not O(1)
-#[derive(Debug)]
-pub(crate) struct Auto512Num<'a, T: IsNumber> {
-	pub data_ptr: *mut T,
-	pub len: u8, // Need it to be smaller to used in NumVec
-	pub data: &'a mut [T],
-}
-impl<T: IsNumber> Auto512Num<'_, T> {
-	pub fn new() -> Result<Self, &'static str> {
-		const BIT_SIZE: usize = 512;
-		let element_layout = Layout::new::<T>();
-		let data_size = BIT_SIZE / 8 / element_layout.size();
-
-		// Calculate the layout for the slice
-		let slice_layout = Layout::from_size_align(
-			BIT_SIZE / 8,
-			element_layout.align()
-		)
-		.unwrap();
-
-		// Allocate memory for the slice
-		let ptr = unsafe { alloc(slice_layout) as *mut T};
-		if ptr.is_null() { return Err("Memory allocation failed."); }
-
-		// Initialize all elements to 0 with write_bytes while ignoring the type
-		unsafe { ptr::write_bytes(ptr, 0, data_size); }
-
-		let array = unsafe { std::slice::from_raw_parts_mut(ptr, data_size) };
-		Ok(Auto512Num {
-			data_ptr: ptr,
-			len: data_size as u8,
-			data: array,
-		})
-	}
-
-	pub fn size(&self) -> usize { self.len as usize }
-}
-
-impl<T: IsNumber> Index<usize> for Auto512Num<'_, T> {
-	type Output = T;
-	fn index(&self, index: usize) -> &Self::Output { &self.data[index] }
-}
-
-impl<T: IsNumber> IndexMut<usize> for Auto512Num<'_, T> {
-	fn index_mut(&mut self, index: usize) -> &mut Self::Output { &mut self.data[index] }
-}
-
-impl<T: IsNumber> Drop for Auto512Num<'_, T> {
-	fn drop(&mut self) {
-		unsafe {
-		dealloc(
-			self.data_ptr as *mut u8,
-			Layout::from_size_align_unchecked(512 / 8, std::mem::align_of::<T>()),
-		);
-		}
-	}
-}
-
-
 // Work in progress
 #[derive(Debug)]
-pub(crate) struct NumVec<'a, T: IsNumber> {
-	pub data_ptr: *mut T,
-	pub alloc_len: usize,
+pub(crate) struct FlxVec<'a, T: IsNumber> {
+	pub oned_ptrs: &'a mut [*mut T],
+	pub oned_slices: &'a mut [&'a mut [T]],
+	pub twod_ptr: *mut *mut T,
+	pub twod_slice: *mut &'a mut [T],
+	pub oned_len: usize,
+	pub twod_len: usize,
 	pub len: usize,
-	pub data: &'a mut [T],
 }
 
-impl<T: IsNumber> NumVec<'_, T> {
+impl<T: IsNumber> FlxVec<'_, T> {
 	pub fn new(size: usize) -> Result<Self, &'static str> {
 		// Calculate the layout for the elements of the slice
+		const ONED_BYTE_SIZE: usize = 32 * 1024;
 		let element_layout = Layout::new::<T>();
 
-		const sizeof_avx512: usize = 64;
-		let sizeof_generic = element_layout.size();
+		let oned_size = ONED_BYTE_SIZE / element_layout.size();
+		let twod_size = size / oned_size + 1;
 
-		let array_size = sizeof_avx512 / sizeof_generic;
-		let ceiled_size = size + (16 - size % 16);
-
+		// ----- 2D pointers ----- //
 		// Calculate the layout for the slice
-		let slice_layout = Layout::from_size_align(
-			ceiled_size * sizeof_generic,
-			element_layout.align()
+		let twod_layout_ptr = Layout::from_size_align(
+			twod_size * std::mem::size_of::<*mut *mut T>(),
+			std::mem::align_of::<*mut *mut T>()
 		)
-		.unwrap();
+			.unwrap();
 
-		// Allocate memory for the slice
-		let ptr = unsafe { alloc(slice_layout) as *mut T};
-		if ptr.is_null() { return Err("Memory allocation failed."); }
+		// Allocate memory for the pointers
+		let twod_alloc_ptrs = unsafe { alloc(twod_layout_ptr) as *mut *mut T };
+		if twod_alloc_ptrs.is_null() { return Err("Memory allocation failed."); }
 
 		// Initialize all elements to 0 with write_bytes while ignoring the type
-		unsafe { ptr::write_bytes(ptr, 0, size); }
+		unsafe { ptr::write_bytes(twod_alloc_ptrs, 0, 1); }
 
-		let array = unsafe { std::slice::from_raw_parts_mut(ptr, size) };
+		let twod_array_ptrs = unsafe { std::slice::from_raw_parts_mut(twod_alloc_ptrs, twod_size) };
 
-		Ok(NumVec {
-			data_ptr: ptr,
-			alloc_len: 0,
+		// ----- 2D layout ----- //
+		let twod_layout_data = Layout::from_size_align(
+			twod_size * std::mem::size_of::<*mut &mut [T]>(),
+			std::mem::align_of::<*mut &mut [T]>()
+		)
+			.unwrap();
+
+		let twod_alloc_slice = unsafe { alloc(twod_layout_data) as *mut &mut [T] };
+		if twod_alloc_slice.is_null() { return Err("Memory allocation failed."); }
+
+		unsafe { ptr::write_bytes(twod_alloc_slice, 0, twod_size); } // Out-of-bounds????
+
+		let twod_array_slices = unsafe { std::slice::from_raw_parts_mut(twod_alloc_slice, 1) };
+
+		// ----- 1D ----- //
+		let oned_layout = Layout::from_size_align(ONED_BYTE_SIZE, std::mem::align_of::<T>()).unwrap();
+
+		for i in 0..twod_size {
+			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
+			if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
+
+			unsafe { ptr::write_bytes(oned_alloc_ptr, 0, oned_size); }
+
+			let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, oned_size) };
+
+			twod_array_ptrs[i] = oned_alloc_ptr;
+			twod_array_slices[i] = oned_array; // Out-of-bounds????
+		}
+
+		Ok(FlxVec {
+			oned_ptrs: twod_array_ptrs,
+			oned_slices: twod_array_slices,
+			twod_ptr: twod_alloc_ptrs,
+			twod_slice: twod_alloc_slice,
+			oned_len: oned_size,
+			twod_len: twod_size,
 			len: size,
-			data: array,
 		})
 	}
 
 	pub fn size(&self) -> usize { self.len }
 }
 
-impl<T: IsNumber> Index<usize> for NumVec<'_, T> {
+impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
-	fn index(&self, index: usize) -> &Self::Output { &self.data[index] }
+	fn index(&self, index: usize) -> &Self::Output {
+		println!("{}", index);
+		&self.oned_slices[index >> 15][index & (self.oned_len - 1)]
+	}
 }
 
-impl<T: IsNumber> IndexMut<usize> for NumVec<'_, T> {
-	fn index_mut(&mut self, index: usize) -> &mut Self::Output { &mut self.data[index] }
+impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
+	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+		println!("{}", index);
+		&mut self.oned_slices[index >> 15][index & (self.oned_len - 1)]
+	}
 }
 
-impl<T: IsNumber> Drop for NumVec<'_, T> {
+impl<T: IsNumber> Drop for FlxVec<'_, T> {
 	fn drop(&mut self) {
 		unsafe {
+		for i in 0..self.twod_len {
+			dealloc(
+				self.oned_ptrs[i] as *mut u8,
+				Layout::from_size_align_unchecked(self.oned_len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
+			);
+		}
 		dealloc(
-			self.data_ptr as *mut u8,
-			Layout::from_size_align_unchecked(self.len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
+			self.twod_ptr as *mut u8, // Work in progress
+			Layout::from_size_align_unchecked(self.twod_len * std::mem::size_of::<*mut *mut T>(), std::mem::align_of::<T>()),
+		);
+		dealloc(
+			self.twod_slice as *mut u8, // Work in progress
+			Layout::from_size_align_unchecked(self.twod_len * std::mem::size_of::<*mut &mut [T]>(), std::mem::align_of::<T>()),
 		);
 		}
 	}
