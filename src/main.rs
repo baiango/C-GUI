@@ -41,9 +41,10 @@ fn main() {
 	println!("{:?}", strvec);
 
 	//----- fust_gui::alloc::FlxVec -----//
-	let mut intvec = alloc::FlxVec::<u64>::new(10).unwrap();
-	// intvec[9] = 100;
+	let mut intvec = alloc::FlxVec::<u64>::new(10000).unwrap();
+	intvec[8193] = 123;
 	println!("{:?}", intvec);
+	println!("{:?}", intvec[8193]);
 
 	// Compiling error
 	//let mut strvec = alloc::FlxVec::<&str>::new(10).unwrap();

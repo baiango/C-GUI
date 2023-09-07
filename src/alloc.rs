@@ -91,6 +91,7 @@ pub(crate) struct FlxVec<'a, T: IsNumber> {
 	pub twod_ptr: *mut *mut T,
 	pub twod_slice: *mut &'a mut [T],
 	pub oned_len: usize,
+	pub oned_log2_len: u8,
 	pub twod_len: usize,
 	pub len: usize,
 }
@@ -117,7 +118,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		if twod_alloc_ptrs.is_null() { return Err("Memory allocation failed."); }
 
 		// Initialize all elements to 0 with write_bytes while ignoring the type
-		unsafe { ptr::write_bytes(twod_alloc_ptrs, 0, 1); }
+		unsafe { ptr::write_bytes(twod_alloc_ptrs, 0, twod_size); }
 
 		let twod_array_ptrs = unsafe { std::slice::from_raw_parts_mut(twod_alloc_ptrs, twod_size) };
 
@@ -133,7 +134,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 
 		unsafe { ptr::write_bytes(twod_alloc_slice, 0, twod_size); } // Out-of-bounds????
 
-		let twod_array_slices = unsafe { std::slice::from_raw_parts_mut(twod_alloc_slice, 1) };
+		let twod_array_slices = unsafe { std::slice::from_raw_parts_mut(twod_alloc_slice, twod_size) };
 
 		// ----- 1D ----- //
 		let oned_layout = Layout::from_size_align(ONED_BYTE_SIZE, std::mem::align_of::<T>()).unwrap();
@@ -156,6 +157,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 			twod_ptr: twod_alloc_ptrs,
 			twod_slice: twod_alloc_slice,
 			oned_len: oned_size,
+			oned_log2_len: oned_size.trailing_zeros() as u8,
 			twod_len: twod_size,
 			len: size,
 		})
@@ -167,15 +169,13 @@ impl<T: IsNumber> FlxVec<'_, T> {
 impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
 	fn index(&self, index: usize) -> &Self::Output {
-		println!("{}", index);
-		&self.oned_slices[index >> 15][index & (self.oned_len - 1)]
+		&self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
 	}
 }
 
 impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		println!("{}", index);
-		&mut self.oned_slices[index >> 15][index & (self.oned_len - 1)]
+		&mut self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
 	}
 }
 
