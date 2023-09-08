@@ -1,7 +1,7 @@
 mod unit_test;
 mod gui_loop;
 mod glmlib;
-mod calloc;
+mod vecalloc;
 
 
 fn main() {

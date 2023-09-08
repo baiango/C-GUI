@@ -44,8 +44,6 @@ impl<T> CVec<'_, T> {
 			data: array,
 		})
 	}
-
-	pub fn size(&self) -> usize { self.len }
 }
 
 impl<T> Index<usize> for CVec<'_, T> {
@@ -133,6 +131,11 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		let twod_alloc_slice = unsafe { alloc(twod_layout_data) as *mut &mut [T] };
 		if twod_alloc_slice.is_null() { return Err("Memory allocation failed."); }
 
+		println!("{:?}", twod_layout_ptr);
+		println!("{:?}", twod_alloc_ptrs);
+		println!("{:?}", twod_layout_data);
+		println!("{:?}", twod_alloc_slice);
+
 		// Invalid memory access????
 		unsafe { ptr::write_bytes(twod_alloc_slice, 0, twod_size); }
 
@@ -146,6 +149,7 @@ impl<T: IsNumber> FlxVec<'_, T> {
 			.unwrap();
 
 		for i in 0..twod_size {
+			// Memory leak????
 			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
 			if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
 
@@ -181,15 +185,16 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		})
 	}
 
-	pub fn size(&self) -> usize { self.len }
+	pub fn resize(&mut self, size: usize) -> Result<(), &'static str> {
+		const ONED_BYTE_SIZE: usize = 32 * 1024;
 
-	pub fn resize(&mut self, size: usize) {
 		let old_len = self.twod_len;
 		self.twod_len = size / self.oned_len + 1;
 		println!("{} {}", size, self.twod_len);
 
 		unsafe {
 		// ----- 1D ----- //
+		// Need the std::max to remove the irregular size array
 		for i in max(0, self.twod_len - 1)..old_len - 1 {
 			dealloc(
 				self.oned_ptrs[i] as *mut u8,
@@ -202,7 +207,27 @@ impl<T: IsNumber> FlxVec<'_, T> {
 		);
 		}
 
+		for i in 0..self.twod_len {
+		// ----- 1D ----- //
+		let oned_layout = Layout::from_size_align(
+			ONED_BYTE_SIZE,
+			std::mem::align_of::<T>()
+		)
+			.unwrap();
+
+			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
+			if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
+
+			unsafe { ptr::write_bytes(oned_alloc_ptr, 0, self.oned_len); }
+
+			let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, self.oned_len) };
+
+			self.oned_ptrs[i] = oned_alloc_ptr;
+			// Invalid memory access????
+			self.oned_slices[i] = oned_array;
+		}
 		self.len = size;
+		Ok(())
 	}
 }
 
@@ -231,10 +256,6 @@ impl<T: IsNumber> Drop for FlxVec<'_, T> {
 				Layout::from_size_align_unchecked(self.oned_len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
 			);
 		}
-		dealloc(
-			self.oned_ptrs[self.twod_len - 1] as *mut u8,
-			Layout::from_size_align_unchecked((self.len & (self.oned_len - 1)) * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
-		);
 		// ----- 2D ----- //
 		dealloc(
 			self.twod_ptr as *mut u8,

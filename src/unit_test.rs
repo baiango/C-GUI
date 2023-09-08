@@ -1,4 +1,4 @@
-use crate::{glmlib, calloc};
+use crate::{glmlib, vecalloc};
 use crate::glmlib::Vec3f;
 
 
@@ -26,24 +26,24 @@ pub fn test() {
 	}
 
 	// ----- fust_gui::calloc::CVec ----- //
-	let mut intvec = calloc::CVec::<i32>::new(10).unwrap();
+	let mut intvec = vecalloc::CVec::<i32>::new(10).unwrap();
 	intvec[9] = 100;
 	println!("{:?}", intvec);
 
-	let mut strvec = calloc::CVec::<&str>::new(10).unwrap();
+	let mut strvec = vecalloc::CVec::<&str>::new(10).unwrap();
 	strvec[5] = "123";
 	println!("{:?}", strvec);
 
 	// ----- fust_gui::calloc::FlxVec ----- //
-	let mut intvec = calloc::FlxVec::<u64>::new(10000).unwrap();
+	let mut intvec = vecalloc::FlxVec::<u64>::new(10000).unwrap();
 	intvec[8193] = 123;
 	intvec[9999] = 9999;
-	println!("{:?}", intvec);
+	// println!("{:?}", intvec);
 	println!("{:?}", intvec[8193]);
 	println!("{:?}", intvec[9999]);
 
-	intvec.resize(9);
-	// println!("{:?}", intvec);
+	intvec.resize(9).unwrap();
+	println!("{:?}", intvec);
 
 	// Compiling error
 	//let mut strvec = calloc::FlxVec::<&str>::new(10).unwrap();
