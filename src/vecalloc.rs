@@ -1,5 +1,4 @@
 use std::alloc::{alloc, dealloc, Layout};
-use std::cmp::max;
 use std::ptr;
 use std::ops::{Index, IndexMut};
 
@@ -85,148 +84,85 @@ impl IsNumber for f64 {}
 // Work in progress
 #[derive(Debug)]
 pub(crate) struct FlxVec<'a, T: IsNumber> {
-	pub oned_ptrs: &'a mut [*mut T],
-	pub oned_slices: &'a mut [&'a mut [T]],
-	pub twod_ptr: *mut *mut T,
-	pub twod_slice: *mut &'a mut [T],
-	pub oned_len: usize,
-	pub oned_log2_len: u8,
-	pub twod_len: usize,
-	pub len: usize,
+	pub outer_ptrs: *mut *mut T,
+	pub outer_slices: *mut &'a mut [T],
+	pub outer_ptrs_slice: &'a mut [*mut T],
+	pub outer_slices_slice: &'a mut [&'a mut [T]],
+	pub outer_len: usize,
+	pub inner_len: usize,
+	pub size: usize
 }
 
 impl<T: IsNumber> FlxVec<'_, T> {
 	pub fn new(size: usize) -> Result<Self, &'static str> {
-		// Calculate the layout for the elements of the slice
-		const ONED_BYTE_SIZE: usize = 32 * 1024;
-		let element_layout = Layout::new::<T>();
+		let generic_layout = Layout::new::<T>();
+		let inner_len = 32768 / generic_layout.size();
+		let outer_len = size / inner_len + 1;
 
-		let oned_size = ONED_BYTE_SIZE / element_layout.size();
-		let twod_size = size / oned_size + 1;
+		// ----- Outer ptrs ----- //
+		let outer_ptrs_layout = Layout::array::<*mut T>(outer_len).unwrap();
+		let outer_ptrs = unsafe { alloc(outer_ptrs_layout) as *mut *mut T };
+		if outer_ptrs.is_null() { return Err("Memory allocation for row pointers failed.") }
 
-		// ----- 2D pointers ----- //
-		// Calculate the layout for the slice
-		let twod_layout_ptr = Layout::from_size_align(
-			twod_size * std::mem::size_of::<*mut *mut T>(),
-			std::mem::align_of::<*mut *mut T>()
-		)
-			.unwrap();
+		let outer_ptrs_slice = unsafe { std::slice::from_raw_parts_mut(
+			outer_ptrs, outer_len
+		) };
+		// ----- Outer slices ----- //
+		let outer_slices = unsafe { alloc(outer_ptrs_layout) as *mut &mut [T] };
+		if outer_slices.is_null() { return Err("Memory allocation for row pointers failed.") }
 
-		// Allocate memory for the pointers
-		let twod_alloc_ptrs = unsafe { alloc(twod_layout_ptr) as *mut *mut T };
-		if twod_alloc_ptrs.is_null() { return Err("Memory allocation failed."); }
+		let outer_slices_slice = unsafe { std::slice::from_raw_parts_mut(
+			outer_slices, outer_len
+		) };
 
-		// Initialize all elements to 0 with write_bytes while ignoring the type
-		unsafe { ptr::write_bytes(twod_alloc_ptrs, 0, twod_size); }
 
-		let twod_array_ptrs = unsafe { std::slice::from_raw_parts_mut(twod_alloc_ptrs, twod_size) };
+		// ----- Inner slices ----- //
+		let inner_layout = Layout::array::<T>(inner_len).unwrap();
+		for i in 0..outer_len - 1 {
+			let inner_ptr = unsafe { alloc(inner_layout) as *mut T };
+			if inner_ptr.is_null() { return Err("Memory allocation for inner pointers failed.") }
 
-		// ----- 2D layout ----- //
-		let twod_layout_data = Layout::from_size_align(
-			twod_size * std::mem::size_of::<*mut &mut [T]>(),
-			std::mem::align_of::<*mut &mut [T]>()
-		)
-			.unwrap();
+			let inner_slice = unsafe { std::slice::from_raw_parts_mut(
+				inner_ptr, inner_len
+			) };
+			unsafe { ptr::write_bytes(inner_slice.as_mut_ptr(), 0, inner_len); }
 
-		let twod_alloc_slice = unsafe { alloc(twod_layout_data) as *mut &mut [T] };
-		if twod_alloc_slice.is_null() { return Err("Memory allocation failed."); }
-
-		println!("{:?}", twod_layout_ptr);
-		println!("{:?}", twod_alloc_ptrs);
-		println!("{:?}", twod_layout_data);
-		println!("{:?}", twod_alloc_slice);
-
-		// Invalid memory access????
-		unsafe { ptr::write_bytes(twod_alloc_slice, 0, twod_size); }
-
-		let twod_array_slices = unsafe { std::slice::from_raw_parts_mut(twod_alloc_slice, twod_size) };
-
-		// ----- 1D ----- //
-		let oned_layout = Layout::from_size_align(
-			ONED_BYTE_SIZE,
-			std::mem::align_of::<T>()
-		)
-			.unwrap();
-
-		for i in 0..twod_size {
-			// Memory leak????
-			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
-			if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
-
-			unsafe { ptr::write_bytes(oned_alloc_ptr, 0, oned_size); }
-
-			let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, oned_size) };
-
-			twod_array_ptrs[i] = oned_alloc_ptr;
-			// Invalid memory access????
-			twod_array_slices[i] = oned_array;
+			outer_ptrs_slice[i] = inner_ptr;
+			outer_slices_slice[i] = inner_slice;
 		}
-		// ----- 1D last index ----- //
-		let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
-		if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
 
-		unsafe { ptr::write_bytes(oned_alloc_ptr, 0, size & (oned_size - 1)); }
 
-		let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, size & (oned_size - 1)) };
+		// ----- Last inner slice ----- //
+		let inner_ptr = unsafe { alloc(inner_layout) as *mut T };
+		if inner_ptr.is_null() { return Err("Memory allocation for inner pointers failed.") }
 
-		twod_array_ptrs[twod_size - 1] = oned_alloc_ptr;
-		// Invalid memory access????
-		twod_array_slices[twod_size - 1] = oned_array;
+		let inner_slice = unsafe { std::slice::from_raw_parts_mut(
+			inner_ptr, size & (inner_len - 1)
+		) };
+		unsafe { ptr::write_bytes(inner_slice.as_mut_ptr(), 0, inner_len); }
+
+		outer_ptrs_slice[outer_len - 1] = inner_ptr;
+		outer_slices_slice[outer_len - 1] = inner_slice;
 
 		Ok(FlxVec {
-			oned_ptrs: twod_array_ptrs,
-			oned_slices: twod_array_slices,
-			twod_ptr: twod_alloc_ptrs,
-			twod_slice: twod_alloc_slice,
-			oned_len: oned_size,
-			oned_log2_len: oned_size.trailing_zeros() as u8,
-			twod_len: twod_size,
-			len: size,
+			outer_ptrs,
+			outer_slices,
+			outer_ptrs_slice,
+			outer_slices_slice,
+			outer_len,
+			inner_len,
+			size
 		})
 	}
 
-	pub fn resize(&mut self, size: usize) -> Result<(), &'static str> {
-		const ONED_BYTE_SIZE: usize = 32 * 1024;
+	pub fn resize(&mut self, new_size: usize) -> Result<(), &'static str> {
+		let generic_layout = Layout::new::<T>();
+		let new_inner_len = 32768 / generic_layout.size();
+		let new_outer_len = new_size / new_inner_len + 1;
 
-		let old_len = self.twod_len;
-		self.twod_len = size / self.oned_len + 1;
-		println!("{} {}", size, self.twod_len);
+		let old_inner_len = self.inner_len;
+		let old_outer_len = self.outer_len;
 
-		unsafe {
-		// ----- 1D ----- //
-		// Need the std::max to remove the irregular size array
-		for i in max(0, self.twod_len - 1)..old_len - 1 {
-			dealloc(
-				self.oned_ptrs[i] as *mut u8,
-				Layout::from_size_align_unchecked(self.oned_len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
-			);
-		}
-		dealloc(
-			self.oned_ptrs[old_len - 1] as *mut u8,
-			Layout::from_size_align_unchecked((self.len & (self.oned_len - 1)) * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
-		);
-		}
-
-		for i in 0..self.twod_len {
-		// ----- 1D ----- //
-		let oned_layout = Layout::from_size_align(
-			ONED_BYTE_SIZE,
-			std::mem::align_of::<T>()
-		)
-			.unwrap();
-
-			let oned_alloc_ptr = unsafe { alloc(oned_layout) as *mut T };
-			if oned_alloc_ptr.is_null() { return Err("Memory allocation failed."); }
-
-			unsafe { ptr::write_bytes(oned_alloc_ptr, 0, self.oned_len); }
-
-			let oned_array = unsafe { std::slice::from_raw_parts_mut(oned_alloc_ptr, self.oned_len) };
-
-			self.oned_ptrs[i] = oned_alloc_ptr;
-			// Invalid memory access????
-			self.oned_slices[i] = oned_array;
-		}
-		self.len = size;
 		Ok(())
 	}
 }
@@ -234,37 +170,12 @@ impl<T: IsNumber> FlxVec<'_, T> {
 impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
 	fn index(&self, index: usize) -> &Self::Output {
-		// Invalid memory access????
-		&self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
+		&self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
 }
 
 impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		// Invalid memory access????
-		&mut self.oned_slices[index >> self.oned_log2_len][index & (self.oned_len - 1)]
-	}
-}
-
-impl<T: IsNumber> Drop for FlxVec<'_, T> {
-	fn drop(&mut self) {
-		unsafe {
-		// ----- 1D ----- //
-		for i in 0..self.twod_len - 1 {
-			dealloc(
-				self.oned_ptrs[i] as *mut u8,
-				Layout::from_size_align_unchecked(self.oned_len * std::mem::size_of::<T>(), std::mem::align_of::<T>()),
-			);
-		}
-		// ----- 2D ----- //
-		dealloc(
-			self.twod_ptr as *mut u8,
-			Layout::from_size_align_unchecked(self.twod_len * std::mem::size_of::<*mut *mut T>(), std::mem::align_of::<T>()),
-		);
-		dealloc(
-			self.twod_slice as *mut u8,
-			Layout::from_size_align_unchecked(self.twod_len * std::mem::size_of::<*mut &mut [T]>(), std::mem::align_of::<T>()),
-		);
-		}
+		&mut self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
 }
