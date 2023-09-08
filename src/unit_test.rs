@@ -35,23 +35,23 @@ pub fn test() {
 	println!("{:?}", strvec);
 
 	// ----- fust_gui::calloc::FlxVec ----- //
-  {
-  // TODO: Test 0 size
+	{
+	// TODO: Test 0 size
 	// let mut intvec = vecalloc::FlxVec::<u64>::new(20).unwrap();
 	let mut intvec = vecalloc::FlxVec::<u64>::new(10000).unwrap();
 	intvec[8193] = 123;
 	intvec[9999] = 9999;
-  for i in 0..4096 {
-    intvec[i] = 4096 - i as u64;
-  }
+	for i in 0..4096 {
+		intvec[i] = 4096 - i as u64;
+	}
 	// println!("{:?}", intvec);
-	// println!("{:?}", intvec[8193]);
-	// println!("{:?}", intvec[9999]);
+	println!("{:?}", intvec[8193]);
+	println!("{:?}", intvec[9999]);
 
-	intvec.resize(10).unwrap();
-	// println!("{:?}", intvec);
+	let intvec2 = intvec.resize(10).unwrap();
+	println!("{:?}", intvec2);
 	// Compiling error
 	// let mut strvec = vecalloc::FlxVec::<&str>::new(10).unwrap();
-  }
+	}
 	println!("Done testing!");
 }
