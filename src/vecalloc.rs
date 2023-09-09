@@ -1,4 +1,4 @@
-use std::alloc::{alloc, Layout};
+use std::alloc::{alloc, dealloc, Layout};
 use std::{ptr, slice};
 use std::ops::{Index, IndexMut};
 
@@ -14,30 +14,49 @@ pub(crate) struct CVec<'a, T> {
 }
 
 impl<T> CVec<'_, T> {
-	pub fn new<'a>(size: usize) -> Result<Self, &'a str> {
+	fn get_layout(size: usize) -> Layout {
 		// Calculate the layout for the elements of the slice
 		let generic = Layout::new::<T>();
 
-		// Calculate the layout for the slice
-		let layout = Layout::from_size_align(
+		Layout::from_size_align(
 			size * generic.size(),
 			generic.align()
 		)
-			.unwrap();
+			.unwrap()
+	}
+
+	pub fn new<'a>(size: usize) -> Self {
+		// Calculate the layout for the slice
+		let layout = Self::get_layout(size);
 
 		// Allocate memory for the slice
 		let ptr = unsafe { alloc(layout) as *mut T };
-		if ptr.is_null() { return Err("Memory allocation failed."); }
+		if ptr.is_null() { panic!("Memory allocation failed."); }
 
 		// Initialize all elements to 0 with write_bytes while ignoring the type
 		unsafe { ptr::write_bytes(ptr, 0, size); }
 
-		let data = unsafe { slice::from_raw_parts_mut(ptr, size) };
-
-		Ok(CVec { data })
+		unsafe { CVec { data: slice::from_raw_parts_mut(ptr, size) } }
 	}
 
 	pub fn len(&self) -> usize { self.data.len() }
+
+	pub fn resize<'a>(&mut self, size: usize) {
+		let new_layout = Self::get_layout(size);
+
+		// Allocate memory for the slice
+		let new_ptr = unsafe { alloc(new_layout) as *mut T };
+		if new_ptr.is_null() { panic!("Memory allocation failed."); }
+
+		let copy_len = std::cmp::min(self.data.len(), size);
+		let new_slice;
+		unsafe {
+		ptr::copy_nonoverlapping(self.data.as_ptr(), new_ptr, copy_len);
+		new_slice = slice::from_raw_parts_mut(new_ptr, size);
+		}
+
+		self.data = new_slice;
+	}
 }
 
 impl<T> Index<usize> for CVec<'_, T> {
@@ -66,92 +85,94 @@ impl IsNumber for f64 {}
 // Work in progress
 #[derive(Debug)]
 pub(crate) struct FlxVec<'a, T: IsNumber> {
-	pub outer_slices_slice: Option<&'a mut [&'a mut [T]]>,
+	pub outer_slices_slice: &'a mut [CVec<'a, T>],
 	pub inner_len: usize,
 	pub outer_len: usize,
 	pub size: usize
 }
 
-impl<T: IsNumber + std::fmt::Debug> FlxVec<'_, T> {
+impl<T: IsNumber + Copy + std::fmt::Debug> FlxVec<'_, T> {
 	// Don't use self in here, because people won't realize it requires outer_len
 	// without reading these huge chunks of code
-	fn new_outer<'a>(outer_len: usize) -> Result<Option<&'a mut [&'a mut [T]]>, &'a str> {
+	fn new_outer<'a>(outer_len: usize) -> &'a mut [CVec<'a, T>] {
 		// ----- Outer ptrs ----- //
-		let outer_ptrs_layout = Layout::array::<&mut [T]>(outer_len).unwrap();
-		let outer_ptrs = unsafe { alloc(outer_ptrs_layout) as *mut &mut [T] };
-		if outer_ptrs.is_null() { return Err("Memory allocation for outer ptrs failed.") }
+		let outer_ptrs_layout = Layout::array::<CVec<T>>(outer_len).unwrap();
+		let outer_ptrs = unsafe { alloc(outer_ptrs_layout) as *mut CVec<T> };
+		if outer_ptrs.is_null() { panic!("Memory allocation for outer ptrs failed.") }
 
 		// ----- Outer slices ----- //
 		// The first index of the slice is the pointer of the outer pointer
-		unsafe { Ok(Some(slice::from_raw_parts_mut(outer_ptrs, outer_len))) }
+		unsafe { slice::from_raw_parts_mut(outer_ptrs, outer_len) }
 	}
 
-	pub fn new<'a>(size: usize) -> Result<Self, &'a str> {
+	pub fn new<'a>(size: usize) -> Self {
 		let generic_layout = Layout::new::<T>();
 		let inner_len = 32768 / generic_layout.size();
 		let outer_len = size / inner_len + 1;
 
 		// ----- Outer slices ----- //
-		let mut outer_slices_slice = Self::new_outer(outer_len).unwrap();
+		let outer_slices_slice = Self::new_outer(outer_len);
 
 		// ----- Inner slices ----- //
 		for i in 0..outer_len{
 			let mut inner_size = inner_len;
 			if i == outer_len - 1 { inner_size = size & (inner_len - 1); }
 
-			let inner_layout = Layout::array::<T>(inner_size).unwrap();
-			let inner_ptr = unsafe { alloc(inner_layout) as *mut T };
-			if inner_ptr.is_null() { return Err("Memory allocation for inner pointers failed.") }
-
-			let inner_slice = unsafe { slice::from_raw_parts_mut(
-				inner_ptr, inner_size
-			) };
-
-			unsafe { ptr::write_bytes(inner_slice.as_mut_ptr(), 0, inner_size); }
-
-			let outer_slices_vec = outer_slices_slice.as_mut()
-				.expect("outer_slices_vec should not be null");
-			outer_slices_vec[i] = inner_slice;
+			outer_slices_slice[i] = CVec::<T>::new(inner_size);
 		}
 
-		Ok(FlxVec {
+		FlxVec {
 			outer_slices_slice,
 			inner_len,
 			outer_len,
 			size
-		})
+		}
 	}
 
-	pub fn resize<'a>(self, size: usize) -> Result<Self, &'a str> {
-		let outer_len = size / self.inner_len + 1;
+	pub fn resize<'a>(&mut self, size: usize) {
+		let inner_len = self.inner_len;
+		let outer_len = size / inner_len + 1;
 
-		// Create a new FlxVec
-		let new_outer_slices_slice = Self::new_outer(outer_len).unwrap();
+		let new_outer_slices_slice = Self::new_outer(outer_len);
 
-		Ok(FlxVec {
-			outer_slices_slice: new_outer_slices_slice,
-			inner_len: self.inner_len,
-			outer_len,
-			size,
-		})
+		// ----- if size is smaller ----- //
+		if self.size > size {
+			// ----- Fill CVec ----- //
+
+			for i in 0..outer_len{
+				let mut inner_size = inner_len;
+				if i == outer_len - 1 { inner_size = size & (inner_len - 1); }
+
+				new_outer_slices_slice[i] = CVec::<T>::new(inner_size);
+			}
+			// ----- Copy ----- //
+			for i in 0..outer_len - 1 {
+				for j in 0..inner_len {
+					new_outer_slices_slice[i][j] = self.outer_slices_slice[i][j];
+				}
+			}
+			// ----- Copy last ----- //
+			for i in 0..size & (inner_len - 1) {
+				new_outer_slices_slice[outer_len - 1][i] = self.outer_slices_slice[outer_len - 1][i];
+			}
+		}
+		// ----- if size is bigger ----- //
+
+	self.outer_slices_slice = new_outer_slices_slice;
+		self.outer_len = outer_len;
+		self.size = size;
 	}
 }
 
 impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
 	fn index(&self, index: usize) -> &Self::Output {
-		let outer_slices_vec = self.outer_slices_slice.as_ref()
-			.expect("outer_slices_slice should not be null");
-
-			&outer_slices_vec[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
+		&self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
 }
 
 impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		let outer_slices_vec = self.outer_slices_slice.as_mut()
-			.expect("outer_slices_slice should not be null");
-
-			&mut outer_slices_vec[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
+		&mut self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
 }
