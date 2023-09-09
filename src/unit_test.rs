@@ -50,10 +50,17 @@ pub fn test() {
 
 	intvec.resize(10);
 	println!("{:?}", intvec);
-	intvec.resize(5000);
+	intvec.resize(10000);
+	intvec[8190] = 8190;
+	intvec[9998] = 9998;
+	println!("{:?}", intvec[8190]);
+	println!("{:?}", intvec[9998]);
+	intvec.resize(8193);
 	println!("{:?}", intvec);
-	// Compiling error
-	// let mut strvec = vecalloc::FlxVec::<&str>::new(10);
+
+	let mut strvec = vecalloc::FlxVec::<&str>::new(10);
+	strvec[5] = "123";
+	println!("{:?}", strvec);
 	}
 	println!("Done testing!");
 }

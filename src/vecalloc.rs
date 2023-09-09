@@ -84,14 +84,14 @@ impl IsNumber for f64 {}
 
 // Work in progress
 #[derive(Debug)]
-pub(crate) struct FlxVec<'a, T: IsNumber> {
+pub(crate) struct FlxVec<'a, T> {
 	pub outer_slices_slice: &'a mut [CVec<'a, T>],
 	pub inner_len: usize,
 	pub outer_len: usize,
 	pub size: usize
 }
 
-impl<T: IsNumber + Copy + std::fmt::Debug> FlxVec<'_, T> {
+impl<T: Copy> FlxVec<'_, T> {
 	// Don't use self in here, because people won't realize it requires outer_len
 	// without reading these huge chunks of code
 	fn new_outer<'a>(outer_len: usize) -> &'a mut [CVec<'a, T>] {
@@ -130,48 +130,45 @@ impl<T: IsNumber + Copy + std::fmt::Debug> FlxVec<'_, T> {
 	}
 
 	pub fn resize<'a>(&mut self, size: usize) {
-		let inner_len = self.inner_len;
-		let outer_len = size / inner_len + 1;
+		let outer_len = size / self.inner_len + 1;
 
 		let new_outer_slices_slice = Self::new_outer(outer_len);
 
 		// ----- if size is smaller ----- //
+		// ----- Fill CVec ----- //
+		for i in 0..outer_len {
+			let mut inner_size = self.inner_len;
+			if i == outer_len - 1 { inner_size = size & (self.inner_len - 1); }
+
+			new_outer_slices_slice[i] = CVec::<T>::new(inner_size);
+		}
 		if self.size > size {
-			// ----- Fill CVec ----- //
-
-			for i in 0..outer_len{
-				let mut inner_size = inner_len;
-				if i == outer_len - 1 { inner_size = size & (inner_len - 1); }
-
-				new_outer_slices_slice[i] = CVec::<T>::new(inner_size);
-			}
 			// ----- Copy ----- //
 			for i in 0..outer_len - 1 {
-				for j in 0..inner_len {
+				for j in 0..self.inner_len {
 					new_outer_slices_slice[i][j] = self.outer_slices_slice[i][j];
 				}
 			}
 			// ----- Copy last ----- //
-			for i in 0..size & (inner_len - 1) {
+			for i in 0..size & (self.inner_len - 1) {
 				new_outer_slices_slice[outer_len - 1][i] = self.outer_slices_slice[outer_len - 1][i];
 			}
 		}
-		// ----- if size is bigger ----- //
 
-	self.outer_slices_slice = new_outer_slices_slice;
+		self.outer_slices_slice = new_outer_slices_slice;
 		self.outer_len = outer_len;
 		self.size = size;
 	}
 }
 
-impl<T: IsNumber> Index<usize> for FlxVec<'_, T> {
+impl<T> Index<usize> for FlxVec<'_, T> {
 	type Output = T;
 	fn index(&self, index: usize) -> &Self::Output {
 		&self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
 }
 
-impl<T: IsNumber> IndexMut<usize> for FlxVec<'_, T> {
+impl<T> IndexMut<usize> for FlxVec<'_, T> {
 	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
 		&mut self.outer_slices_slice[index >> self.inner_len.trailing_zeros()][index & (self.inner_len - 1)]
 	}
