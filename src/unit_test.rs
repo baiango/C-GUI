@@ -35,45 +35,8 @@ pub fn test() {
 	strvec[5] = "123";
 	println!("{:?}", strvec);
 
-	// ----- fust_gui::calloc::FlxVec ----- //
-	{
-	// TODO: Test 0 size
-	// let mut intvec = vecalloc::FlxVec::<u64>::new(20).unwrap();
-	let mut intvec = vecalloc::FlxVec::<u64>::new(10000);
-	intvec[8193] = 123;
-	intvec[9999] = 9999;
-	for i in 0..4096 {
-		intvec[i] = 4096 - i as u64;
-	}
-	// println!("{:?}", intvec);
-	println!("{:?}", intvec[8193]);
-	println!("{:?}", intvec[9999]);
-
-	intvec.resize(10);
-	println!("{:?}", intvec);
-	intvec.resize(10000);
-	intvec[8190] = 8190;
-	intvec[9998] = 9998;
-	for i in 4000..5000 {
-		intvec[i] = 5000 - i as u64;
-	}
-	println!("{:?}", intvec[8190]);
-	println!("{:?}", intvec[9998]);
-	intvec.resize(4500);
-	println!("{:?}", intvec);
-
 	// ----- Resize speed test ----- //
 	let run = | init_size: usize, resize_size: usize | {
-		let start = Instant::now();
-
-		let mut speedvec = vecalloc::FlxVec::<i32>::new(init_size);
-		println!("inner_len: {}", speedvec.inner_len);
-		speedvec.resize(resize_size);
-
-		let end = Instant::now();
-		let elapsed = end - start;
-		println!("FlxVec elapsed time: {:?}", elapsed);
-
 		let start = Instant::now();
 
 		let mut speedvec = vecalloc::CVec::<i32>::new(init_size);
@@ -103,10 +66,6 @@ pub fn test() {
 	// CVec elapsed time: 11.661979s
 	// Vec elapsed time: 53µs
 	run(1_000_000_000, 900_000_000);
-	// ----- &str ----- //
-	let mut strvec = vecalloc::FlxVec::<&str>::new(10);
-	strvec[5] = "123";
-	println!("{:?}", strvec);
-	}
+
 	println!("Done testing!");
 }
