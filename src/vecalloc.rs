@@ -1,4 +1,4 @@
-use std::alloc::{alloc, dealloc, Layout};
+use std::alloc::{alloc, Layout};
 use std::{ptr, slice};
 use std::ops::{Index, IndexMut};
 
@@ -69,19 +69,6 @@ impl<T> IndexMut<usize> for CVec<'_, T> {
 }
 
 
-pub trait IsNumber {}
-impl IsNumber for i8 {}
-impl IsNumber for i16 {}
-impl IsNumber for i32 {}
-impl IsNumber for i64 {}
-impl IsNumber for u8 {}
-impl IsNumber for u16 {}
-impl IsNumber for u32 {}
-impl IsNumber for u64 {}
-impl IsNumber for f32 {}
-impl IsNumber for f64 {}
-
-
 // Work in progress
 #[derive(Debug)]
 pub(crate) struct FlxVec<'a, T> {
@@ -107,7 +94,7 @@ impl<T: Copy> FlxVec<'_, T> {
 
 	pub fn new<'a>(size: usize) -> Self {
 		let generic_layout = Layout::new::<T>();
-		let inner_len = 32768 / generic_layout.size();
+		let inner_len = (32 * 1024) as usize / generic_layout.size();
 		let outer_len = size / inner_len + 1;
 
 		// ----- Outer slices ----- //
@@ -142,16 +129,23 @@ impl<T: Copy> FlxVec<'_, T> {
 
 			new_outer_slices_slice[i] = CVec::<T>::new(inner_size);
 		}
+
 		if self.size > size {
 			// ----- Copy ----- //
 			for i in 0..outer_len - 1 {
-				for j in 0..self.inner_len {
-					new_outer_slices_slice[i][j] = self.outer_slices_slice[i][j];
+				unsafe {
+				let data =  std::ptr::read(&self.outer_slices_slice[i]);
+				std::ptr::write(&mut new_outer_slices_slice[i], data);
 				}
 			}
 			// ----- Copy last ----- //
 			for i in 0..size & (self.inner_len - 1) {
 				new_outer_slices_slice[outer_len - 1][i] = self.outer_slices_slice[outer_len - 1][i];
+			}
+		} else {
+			// ----- Copy last ----- //
+			for i in 0..self.size & (self.inner_len - 1) {
+				new_outer_slices_slice[0][i] = self.outer_slices_slice[0][i];
 			}
 		}
 

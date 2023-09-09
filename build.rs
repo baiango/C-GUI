@@ -3,26 +3,6 @@ use std::path::Path;
 use std::process::Command;
 
 
-// You might want to compile this twice
-// because Rust doesn't wait for the library to compile
-fn build(path: &str, arguments: &[&str]) {
-	// Define the command and its arguments
-	let cmd = Command::new(path)
-		.args(arguments)
-		.output()
-		.expect("Failed to execute command");
-
-	// Print the output of the command (stdout and stderr)
-	println!("stdout: {:?}", String::from_utf8_lossy(&cmd.stdout));
-	println!("stderr: {:?}", String::from_utf8_lossy(&cmd.stderr));
-
-	// Check the exit status of the command
-	if !cmd.status.success() {
-		panic!("Command failed with exit status: {:?}", cmd.status);
-	}
-}
-
-
 fn main() {
 	let output_dir;
 	let optimizion_str;
@@ -61,6 +41,25 @@ fn main() {
 				fs::remove_file(&lib_file).expect("Failed to remove library file");
 		}
 	}
+
+	// You might want to compile this twice
+	// because Rust doesn't wait for the library to compile
+	let build = | path: &str, arguments: &[&str] | {
+		// Define the command and its arguments
+		let cmd = Command::new(path)
+			.args(arguments)
+			.output()
+			.expect("Failed to execute command");
+
+		// Print the output of the command (stdout and stderr)
+		println!("stdout: {:?}", String::from_utf8_lossy(&cmd.stdout));
+		println!("stderr: {:?}", String::from_utf8_lossy(&cmd.stderr));
+
+		// Check the exit status of the command
+		if !cmd.status.success() {
+			panic!("Command failed with exit status: {:?}", cmd.status);
+		}
+	};
 
 	let ifx_path = "C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\bin\\ifx";
 	let output_obj_str = format!("/object:{}", output_dir.display());
@@ -102,8 +101,6 @@ fn main() {
 
 	build(ifx_path, &ifx_asm_arguments);
 
-	println!("cargo:rustc-cfg=avx2");
-	println!("cargo:rustc-cfg=target_feature=\"avx2\"");
 	println!("cargo:rustc-link-lib=static={}glmlib", output_dir.display());  // Link the static Fortran library
 	println!("cargo:rustc-link-search=native=C:\\Program Files (x86)\\Intel\\oneAPI\\compiler\\2023.2.1\\windows\\compiler\\lib\\intel64_win");
 }
