@@ -1,3 +1,4 @@
+# This repository is [moved to here](https://codeberg.org/baiango/FGUI-confidential) because of lockout concern.
 # Fust-GUI
 I am attempting to make a Scratch knockoff. It will look like a Blender-style UI. The target users are rapid UI prototyping.  
 This project was here because almost every tool distracts you with project folder setup when you only care how about the UI looks and throw it away if it is not fitting.
